@@ -1,6 +1,11 @@
 <?php
 // /app/config/Database.php
 
+require_once '../vendor/autoload.php'; // Adjust the path as necessary
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../'); // Adjust the path to point to the root directory
+$dotenv->load();
+
 class Database {
     private $host;
     private $db_name;
