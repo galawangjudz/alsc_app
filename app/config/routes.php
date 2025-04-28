@@ -12,9 +12,5 @@ $router->post('/register', 'AuthController@register'); // Handle registration
 $router->get('/login', 'AuthController@login'); // Show login form
 $router->post('/login', 'AuthController@login'); // Handle login submission
 $router->get('/logout', 'AuthController@logout'); // Logout user
-// Add this check at the top of your controller methods that need authentication
-AuthMiddleware::checkAuth();
-
-// Example of a protected route (Dashboard)
 $router->get('/dashboard', 'DashboardController@index');
 ?>

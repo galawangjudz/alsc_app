@@ -21,7 +21,7 @@ class Router {
     }
 
     // This will match the current URL and execute the appropriate action
-    public function dispatch() {
+    public function run() {
         $url = $_SERVER['REQUEST_URI'];
         $method = $_SERVER['REQUEST_METHOD'];
 

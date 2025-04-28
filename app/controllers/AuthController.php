@@ -1,74 +1,40 @@
 <?php
+namespace alsc_app\app\controllers;
 
-class AuthController extends Controller {
+// app/controllers/AuthController.php
 
-    public function register() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Collect data from the form
-            $username = $_POST['username'];
-            $email = $_POST['email'];
-            $password = $_POST['password'];
-            $role_id = 2; // Default to a regular user role
 
-            // Validate inputs (simple validation for example)
-            if (empty($username) || empty($email) || empty($password)) {
-                echo "All fields are required!";
-                return;
-            }
-
-            // Hash the password
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-            // Insert user into database
-            $userModel = new User();
-            $userModel->createUser($username, $hashedPassword, $email, $role_id);
-
-            // Redirect to login page
-            header("Location: /login");
-        } else {
-            $this->view->render('auth/register');
-        }
-    }
+class AuthController {
 
     public function login() {
+        // Handle both GET (show login form) and POST (process login) requests
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Collect data from the form
-            $username = $_POST['username'];
-            $password = $_POST['password'];
+            // Handle the POST request to authenticate user
+            $email = $_POST['email'] ?? '';
+            $password = $_POST['password'] ?? '';
 
-            // Validate inputs
-            if (empty($username) || empty($password)) {
-                echo "Username and password are required!";
-                return;
-            }
-
-            // Check if user exists
-            $userModel = new User();
-            $user = $userModel->getUserByUsername($username);
-
-            if ($user && password_verify($password, $user['password'])) {
-                // Password is correct, start the session
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['role_id'] = $user['role_id'];
-
-                // Redirect to the dashboard or homepage
-                header("Location: /dashboard");
+            // Here, authenticate the user using a User model or other logic
+            if ($this->authenticate($email, $password)) {
+                // Redirect to dashboard if successful
+                header('Location: /dashboard');
+                exit;
             } else {
-                echo "Invalid credentials!";
+                // Redirect back to login with an error message if authentication fails
+                $_SESSION['error'] = 'Invalid email or password';
+                header('Location: /login');
+                exit;
             }
-        } else {
-            $this->view->render('auth/login');
         }
+
+        // Handle GET request to show the login form
+        require_once 'app/views/auth/login.php';
     }
 
-    public function logout() {
-        // Destroy the session and log the user out
-        session_start();
-        session_unset();
-        session_destroy();
-
-        // Redirect to login page
-        header("Location: /login");
+    // Add your authentication logic here (e.g., checking database, password, etc.)
+    private function authenticate($email, $password) {
+        // Example logic - you should replace this with actual authentication logic
+        return $email === 'user@example.com' && $password === 'password';
     }
 }
+
