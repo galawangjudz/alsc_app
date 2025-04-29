@@ -1,11 +1,15 @@
 <?php
 
-class Controller {
-    protected $view;
-    protected $model;
+class Controller
+{
+    protected function model($model)
+    {
+        require_once(__DIR__ . '/../models/' . $model . '.php');
+        return new $model();
+    }
 
-    public function __construct($model = null) {
-        $this->view = new View();
-        $this->model = $model;
+    protected function view($view, $data = [])
+    {
+        require_once (__DIR__ . '/../views/' . $view . '_view.php');
     }
 }
