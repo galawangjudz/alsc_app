@@ -2,8 +2,8 @@
 
 class App
 {
-    protected $controller = 'pages';
-    protected $method = 'home';
+    protected $controller = 'auth';
+    protected $method = 'showLoginForm';
     protected $params = [];
 
     public function __construct()

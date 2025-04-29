@@ -10,6 +10,6 @@ class Controller
 
     protected function view($view, $data = [])
     {
-        require_once (__DIR__ . '/../views/' . $view . '_view.php');
+        require_once (__DIR__ . '/../views/' . $view . '.php');
     }
 }
