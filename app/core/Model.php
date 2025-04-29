@@ -1,6 +1,4 @@
 <?php
-// File: core/Model.php
-
 class Model
 {
     protected $table;
@@ -38,4 +36,10 @@ class Model
         }
         return $this;
     }
+
+    public static function firstWhere($column, $value)
+    {
+        return static::where($column, $value); // Alias
+    }
+
 }

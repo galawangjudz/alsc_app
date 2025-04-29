@@ -1,12 +1,63 @@
 <?php
 require_once __DIR__ . '/../core/Model.php';
 
+
 class User extends Model
 {
     protected $table = 'users';
 
-    public function role()
+    public static function all()
     {
-        return $this->belongsTo(Role::class, 'role_id');
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM {$instance->table}");
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_OBJ);
+        return $results;
     }
+
+    public static function find($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
+    public static function insert($data)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("INSERT INTO users (employee_id, name, password, role_id) VALUES (?, ?, ?, ?)");
+        return $stmt->execute([
+            $data['employee_id'], $data['name'], $data['password'], $data['role_id']
+        ]);
+    }
+
+    public static function update($id, $data)
+    {
+        $instance = new static();
+        $fields = [];
+        $params = [];
+        foreach ($data as $key => $val) {
+            $fields[] = "$key = ?";
+            $params[] = $val;
+        }
+        $params[] = $id;
+        $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE id = ?";
+        $stmt = $instance->db->prepare($sql);
+        return $stmt->execute($params);
+    }
+
+    public static function delete($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("DELETE FROM users WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
+
+
 }
+
+
+
+
+

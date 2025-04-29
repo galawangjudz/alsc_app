@@ -1,23 +1,38 @@
 <?php
 require_once __DIR__ . '/../models/User.php';
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 class login extends Controller
 {
     public function showLoginForm()
     {
-       
-        global $db_status; // make sure it's available
-        return $this->view('auth/login');
-        
-    }
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     
+        if (isset($_SESSION['user'])) {
+            // User is already logged in — redirect to dashboard
+            return $this->view('dashboard/index');
+            
+        }
+    
+        return $this->view('auth/login');
+    }
+
     public function login()
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $employeeId = $_POST['employee_id'];
         $password = $_POST['password'];
 
-        $user = User::where('employee_id', $employeeId)->first();
+        $user = User::firstWhere('employee_id', $employeeId); // Removed ->first()
 
-        if (!$user || !password_verify($password, $user->password)) {
+        if (!$user || !hashPassword($user->password)) {
             $_SESSION['error'] = "Invalid Employee ID or Password.";
             return $this->view('auth/login');
         }
@@ -29,11 +44,15 @@ class login extends Controller
             'role_id' => $user->role_id,
         ];
 
-        return $this->view('/dashboard');
+        return $this->view('dashboard/index');
     }
 
     public function logout()
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         session_destroy();
         return $this->view('auth/login');
     }
