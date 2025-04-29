@@ -1,6 +1,6 @@
 <h2>Users</h2>
 
-<a href="/?url=adminuser/create" class="btn btn-success mb-3">+ Add New User</a>
+<a href="<?= url('adminuser/create') ?>" class="btn btn-success mb-3">+ Add New User</a>
 
 <table class="table table-striped">
     <thead>
@@ -21,8 +21,9 @@
                 <td><?= htmlspecialchars($user->name) ?></td>
                 <td><?= htmlspecialchars($user->role_id) ?></td> <!-- You can join to roles table to show name -->
                 <td>
-                    <a href="/?url=adminuser/edit/<?= $user->id ?>" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="/?url=adminuser/delete/<?= $user->id ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                   
+                    <a href="<?= url('adminuser/edit/' . $user->id) ?>" class="btn btn-sm btn-primary">Edit User</a>
+                    <a href="<?= url('adminuser/delete/' . $user->id) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
                 </td>
             </tr>
         <?php endforeach; ?>

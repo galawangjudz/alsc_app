@@ -47,10 +47,10 @@
                 <a href="/" class="nav-link">Home</a>
             </li>
             <li class="nav-item mb-2">
-                <a href="/?url=adminuser/user_list" class="nav-link">Manage Users</a>
+                <a href="<?= url('adminuser/user_list')?>" class="nav-link">Manage Users</a>
             </li>
             <li class="nav-item">
-                <a href="/?url=login/logout" class="nav-link text-danger">Logout</a>
+                <a href="<?= url('login/logout')?>" class="nav-link text-danger">Logout</a>
             </li>
         </ul>
     </div>

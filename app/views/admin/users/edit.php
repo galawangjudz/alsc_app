@@ -25,5 +25,5 @@
     </div>
 
     <button class="btn btn-primary">Update</button>
-    <a href="/?url=adminuser/index" class="btn btn-secondary">Cancel</a>
+    <a href="<?= url('adminuser/index')?>" class="btn btn-secondary">Cancel</a>
 </form>

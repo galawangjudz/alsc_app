@@ -8,7 +8,8 @@ define('DB_USER', 'root');
 
 define('DB_PASS', '');
 
-define('ROOT', '/Routing');
+/* define('CONTROOT', '/Routing/pages'); */
 
-define('CONTROOT', '/Routing/pages');
+define('ROOT', '/alsc_app');
+define('BASE_URL', '/alsc_app');
 ?>

@@ -20,6 +20,7 @@ class adminuser extends Controller
     }
     public function create()
     {
+      
         $roles = Role::all();
         return $this->view('admin/users/create', ['roles' => $roles]);
     }

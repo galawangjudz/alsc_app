@@ -17,7 +17,7 @@
         <label>Role</label>
         <select name="role_id" class="form-select" required>
             <?php foreach ($roles as $role): ?>
-                <option value="<?= $role->id ?>"><?= htmlspecialchars($role->role_name) ?></option>
+                <option value="<?= $role->id ?>"><?= htmlspecialchars($role->name) ?></option>
             <?php endforeach; ?>
         </select>
     </div>
