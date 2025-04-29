@@ -12,6 +12,6 @@ class Pages extends Controller
 
     public function notfound()
     {
-        $this->view('404');
+        $this->view('404_page');
     }
 }

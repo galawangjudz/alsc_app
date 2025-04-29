@@ -2,14 +2,14 @@
 
 class App
 {
-    protected $controller = 'auth';
+    protected $controller = 'login';
     protected $method = 'showLoginForm';
     protected $params = [];
 
     public function __construct()
     {
         $url = $this->parseUrl();
-        // print_r($url);
+        #print_r($url);
 
         if ($url) {
             if (file_exists(__DIR__ . '/../controllers/' . $url[0] . '_controller.php')) {
@@ -29,7 +29,7 @@ class App
         }
 
         $this->params = $url ? array_values($url) : [];
-        // print_r($this->params);
+        #print_r($this->params);
 
         call_user_func_array([$this->controller, $this->method], $this->params);
     }
