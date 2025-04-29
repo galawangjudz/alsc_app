@@ -10,6 +10,7 @@ class Controller
 
     protected function view($view, $data = [])
     {
+        extract($data); // This makes keys in $data available as variables
         require_once (__DIR__ . '/../views/' . $view . '.php');
     }
 }

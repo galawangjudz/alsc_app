@@ -12,6 +12,12 @@ class User extends Model
         $stmt = $instance->db->prepare("SELECT * FROM {$instance->table}");
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        // Debug:
+        //echo "<pre>"; print_r($results);
+        //exit;
+
+
         return $results;
     }
 

@@ -47,7 +47,7 @@
                 <a href="/" class="nav-link">Home</a>
             </li>
             <li class="nav-item mb-2">
-                <a href="/?url=adminuser/index" class="nav-link">Manage Users NEW</a>
+                <a href="/?url=adminuser/user_list" class="nav-link">Manage Users</a>
             </li>
             <li class="nav-item">
                 <a href="/?url=login/logout" class="nav-link text-danger">Logout</a>

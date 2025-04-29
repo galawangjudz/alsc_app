@@ -18,7 +18,7 @@
         <select name="role_id" class="form-select" required>
             <?php foreach ($roles as $role): ?>
                 <option value="<?= $role->id ?>" <?= $user->role_id == $role->id ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($role->role_name) ?>
+                    <?= htmlspecialchars($role->name) ?>
                 </option>
             <?php endforeach; ?>
         </select>

@@ -13,7 +13,7 @@
         </tr>
     </thead>
     <tbody>
-    <?php if (!empty($users)): ?>
+
         <?php foreach ($users as $user): ?>
             <tr>
                 <td><?= htmlspecialchars($user->id) ?></td>
@@ -26,11 +26,7 @@
                 </td>
             </tr>
         <?php endforeach; ?>
-    <?php else: ?>
-        <tr>
-            <td colspan="5" class="text-center">No users found.</td>
-        </tr>
-    <?php endif; ?>
+
 
     </tbody>
 </table>
