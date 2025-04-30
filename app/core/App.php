@@ -3,8 +3,8 @@ require_once __DIR__ . '/../middleware/AuthMiddleware.php';
 
 class App
 {
-    protected $controller = 'login';
-    protected $method = 'showLoginForm';
+    protected $controller = 'auth';
+    protected $method = 'index';
     protected $params = [];
 
     public function __construct()

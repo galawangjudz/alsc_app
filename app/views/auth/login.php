@@ -6,7 +6,7 @@
 </head>
 <body class="d-flex justify-content-center align-items-center vh-100">
 
-    <form action="?url=login/login" method="POST" class="p-5 rounded shadow" style="width: 400px;">
+    <form action="?url=auth/login" method="POST" class="p-5 rounded shadow" style="width: 400px;">
 
         <h2 class="mb-4 text-center">Employee Login</h2>
         <?php if (isset($_SESSION['error'])): ?>

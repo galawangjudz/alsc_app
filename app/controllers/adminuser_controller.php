@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/User.php';
-require_once __DIR__ . '/../models/Role.php';
+require_once __DIR__ . '/../models/Roles.php';
 require_once __DIR__ . '/../middleware/AdminMiddleware.php';
 
 

@@ -4,9 +4,9 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-class login extends Controller
+class auth extends Controller
 {
-    public function showLoginForm()
+    public function index()
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
@@ -14,7 +14,7 @@ class login extends Controller
     
         if (isset($_SESSION['user'])) {
             // User is already logged in — redirect to dashboard
-            return $this->view('dashboard/index');
+            return $this->redirect('dashboard/index');
             
         }
     
@@ -55,7 +55,7 @@ class login extends Controller
         }
 
         session_destroy();
-        return $this->view('auth/login');
+        return $this->redirect('auth/index');
     }
 
     public function notfound()

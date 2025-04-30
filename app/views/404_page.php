@@ -53,7 +53,7 @@
             </div>
         </center>
         <center class="mt-6">
-            <a href="<?php echo ROOT; ?>pages/home" class="text-gray-500 font-mono text-xl bg-gray-200 p-3 rounded-md hover:shadow-md">Go back </a>
+            <a href="<?php echo ROOT; ?>/dashboard/index" class="text-gray-500 font-mono text-xl bg-gray-200 p-3 rounded-md hover:shadow-md">Go back </a>
         </center>
     </div>
 </body>

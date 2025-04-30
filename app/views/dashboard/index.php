@@ -49,8 +49,14 @@
             <li class="nav-item mb-2">
                 <a href="<?= url('adminuser/user_list')?>" class="nav-link">Manage Users</a>
             </li>
+            <li class="nav-item mb-2">
+                <a href="<?= url('permission/index')?>" class="nav-link">Permissions</a>
+            </li>
+            <li class="nav-item mb-2">
+                <a href="<?= url('role/index')?>" class="nav-link">Roles</a>
+            </li>
             <li class="nav-item">
-                <a href="<?= url('login/logout')?>" class="nav-link text-danger">Logout</a>
+                <a href="<?= url('auth/logout')?>" class="nav-link text-danger">Logout</a>
             </li>
         </ul>
     </div>
@@ -69,7 +75,7 @@
             <h1>Admin Dashboard</h1>
             <p>Use the sidebar to navigate.</p>
 
-            <a href="?url=login/logout" class="btn btn-danger mt-3">Logout</a>
+            <a href="?url=auth/logout" class="btn btn-danger mt-3">Logout</a>
         </div>
     </div>
 </div>
