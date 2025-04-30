@@ -51,6 +51,9 @@ class auth extends Controller
             'name' => $user->name,
             'role_id' => $user->role_id,
         ];
+
+        log_activity('login', 'Auth', "User {$user->name} logged in");
+
         return $this->redirect('dashboard/index');
         #return $this->view('dashboard/index');
     }
@@ -60,6 +63,7 @@ class auth extends Controller
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+        log_activity('logout', 'Auth', "User logged out");
 
         session_destroy();
         return $this->redirect('auth/index');

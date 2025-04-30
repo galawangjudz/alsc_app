@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/Permissions.php';
-require_once __DIR__ . '/../middleware/AdminMiddleware.php';
+#require_once __DIR__ . '/../middleware/AdminMiddleware.php';
 
 class permission extends Controller
 {
@@ -25,6 +25,7 @@ class permission extends Controller
     {
         $data = $_POST;
         Permissions::insert($data);
+        ActivityLog::log($_SESSION['employee_id'], 'add', 'Permission', 'Added permission name ' . $data['name']);
         return $this->redirect('permission/index');
     }
 
@@ -38,12 +39,15 @@ class permission extends Controller
     {
         $data = $_POST;
         Permissions::update($id, $data);
+        ActivityLog::log($_SESSION['employee_id'], 'update', 'Permission', 'Updated permission ID ' . $id);
+
         return $this->redirect('permission/index');
     }
 
     public function delete($id)
     {
         Permissions::delete($id);
+        ActivityLog::log($_SESSION['employee_id'], 'delete', 'Permission', 'Deleted permission ID ' . $id);
         return $this->redirect('permission/index');
     }
     public function notfound()
