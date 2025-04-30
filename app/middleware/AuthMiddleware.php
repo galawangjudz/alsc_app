@@ -15,7 +15,7 @@ class AuthMiddleware
             session_unset();
             session_destroy();
             $_SESSION['error'] = "Session expired due to inactivity.";
-            header("Location: /?url=auth/index");
+            header("Location: " . BASE_URL . "/auth/index");
             exit();
         }
 
@@ -25,7 +25,7 @@ class AuthMiddleware
         // Check if user is logged in, if not, redirect to login
         if (!isset($_SESSION['user'])) {
             $_SESSION['error'] = "Please log in to access this page.";
-            header("Location: /?url=auth/index");
+            header("Location: " . BASE_URL . "/auth/index");
             exit();
         }
     
