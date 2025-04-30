@@ -1,6 +1,6 @@
 <h2>Edit User</h2>
 
-<form action="/?url=adminuser/update/<?= $user->id ?>" method="POST" class="mb-4">
+<form action="<?= url('adminuser/update/' . $user->id) ?>" method="POST" class="mb-4">
     <div class="mb-3">
         <label>Employee ID</label>
         <input type="text" name="employee_id" class="form-control" value="<?= htmlspecialchars($user->employee_id) ?>" required>

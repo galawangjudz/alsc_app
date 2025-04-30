@@ -1,6 +1,6 @@
 <h2>Add New User</h2>
 
-<form action="/?url=adminuser/store" method="POST" class="mb-4">
+<form action="<?= url('adminuser/store') ?>" method="POST" class="mb-4">
     <div class="mb-3">
         <label>Employee ID</label>
         <input type="text" name="employee_id" class="form-control" required>
@@ -23,5 +23,5 @@
     </div>
 
     <button class="btn btn-primary">Create</button>
-    <a href="/?url=adminuser/index" class="btn btn-secondary">Cancel</a>
+    <a href="<?= url('adminuser/index') ?>" class="btn btn-secondary">Cancel</a>
 </form>

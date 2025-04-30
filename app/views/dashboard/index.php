@@ -44,7 +44,7 @@
         <hr>
         <ul class="nav flex-column">
             <li class="nav-item mb-2">
-                <a href="/" class="nav-link">Home</a>
+                <a href="<?= url('dashboard/index')?>" class="nav-link">Home</a>
             </li>
             <li class="nav-item mb-2">
                 <a href="<?= url('adminuser/user_list')?>" class="nav-link">Manage Users</a>

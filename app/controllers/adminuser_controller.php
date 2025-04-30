@@ -32,9 +32,19 @@ class adminuser extends Controller
     }
     public function update($id)
     {
-        $user = User::find($id);
-        $roles = Role::all();
-        return $this->view('admin/users/index');
+        $data = $_POST;
+
+        if (empty($data['password'])) {
+            unset($data['password']);
+        } else {
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
+
+        User::update($id, $data);
+        $users = User::all();
+       
+        return $this->view('admin/users/index', ['users' => $users]);
+        
     }
 }
 
