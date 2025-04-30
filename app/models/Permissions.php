@@ -45,6 +45,8 @@ class Permissions extends Model
         return $stmt->execute($params);
     }
 
+    
+
     public static function delete($id)
     {
         $instance = new static();

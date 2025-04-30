@@ -43,4 +43,7 @@ class Roles extends Model
         $stmt = $instance->db->prepare("DELETE FROM roles WHERE id = ?");
         return $stmt->execute([$id]);
     }
+
+
+    
 }

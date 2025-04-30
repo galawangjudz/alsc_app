@@ -45,4 +45,13 @@ class PermissionRole extends Model
         $stmt->execute([$role_id]);
         return $stmt->fetchAll(\PDO::FETCH_COLUMN);
     }
+
+    public static function clear($role_id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("DELETE FROM permission_role WHERE role_id = ?");
+        $stmt->execute([$role_id]);
+    }
+
 }
+

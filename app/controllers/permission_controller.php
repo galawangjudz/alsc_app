@@ -46,8 +46,9 @@ class permission extends Controller
 
     public function delete($id)
     {
+        #ActivityLog::log($_SESSION['employee_id'], 'delete', 'Permission', 'Deleted permission ID ' . $id);
         Permissions::delete($id);
-        ActivityLog::log($_SESSION['employee_id'], 'delete', 'Permission', 'Deleted permission ID ' . $id);
+        #ActivityLog::log($_SESSION['employee_id'], 'delete', 'Permission', 'Deleted permission ID ' . $id);
         return $this->redirect('permission/index');
     }
     public function notfound()

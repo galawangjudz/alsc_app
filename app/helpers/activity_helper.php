@@ -7,6 +7,14 @@ function log_activity($action, $module, $description = '')
     ActivityLog::log($user_id, $action, $module, $description);
 }
 
+function current_user() 
+{
+    return $_SESSION['user'] ?? null; 
+}
+
+function is_admin() { 
+    return $_SESSION['user']['role_id'] == 1; 
+}
 
 function current_user_id() {
     return $_SESSION['user']['employee_id'] ?? null;
