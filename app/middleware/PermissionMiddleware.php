@@ -6,7 +6,7 @@ class PermissionMiddleware
     {
         $userRole = $_SESSION['user']['role'];
 
-        $role = Role::where('name', $userRole)->first();
+        $role = Roles::where('name', $userRole)->first();
 
         $permissions = $role->permissions()->pluck('name')->toArray();
 

@@ -8,6 +8,8 @@ class auth extends Controller
 {
     public function index()
     {
+
+
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -27,7 +29,12 @@ class auth extends Controller
             session_start();
         }
 
-    
+         // Check if the user is already logged in
+        if (isset($_SESSION['user'])) {
+            // If logged in, redirect to the dashboard
+            return $this->redirect('auth/index');
+        }
+       
         $employeeId = $_POST['employee_id'];
         $password = $_POST['password'];
 
@@ -44,8 +51,8 @@ class auth extends Controller
             'name' => $user->name,
             'role_id' => $user->role_id,
         ];
-
-        return $this->view('dashboard/index');
+        return $this->redirect('dashboard/index');
+        #return $this->view('dashboard/index');
     }
 
     public function logout()

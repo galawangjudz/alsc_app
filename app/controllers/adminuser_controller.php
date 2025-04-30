@@ -21,13 +21,13 @@ class adminuser extends Controller
     public function create()
     {
       
-        $roles = Role::all();
+        $roles = Roles::all();
         return $this->view('admin/users/create', ['roles' => $roles]);
     }
     public function edit($id)
     {
         $user = User::find($id);
-        $roles = Role::all();
+        $roles = Roles::all();
         return $this->view('admin/users/edit', ['user' => $user, 'roles' => $roles]);
     }
     public function update($id)
@@ -46,5 +46,10 @@ class adminuser extends Controller
         return $this->view('admin/users/index', ['users' => $users]);
         
     }
+    public function notfound()
+    {
+        $this->view('404_page');
+    }
+
 }
 
