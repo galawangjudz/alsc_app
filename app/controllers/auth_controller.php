@@ -20,7 +20,7 @@ class auth extends Controller
             
         }
     
-        return $this->view_old('auth/login');
+        return $this->view_no_layout('auth/login');
     }
 
     public function login()
@@ -42,7 +42,7 @@ class auth extends Controller
 
         if (!$user || !hashPassword($user->password)) {
             $_SESSION['error'] = "Invalid Employee ID or Password.";
-            return $this->view_old('auth/login');
+            return $this->view_no_layout('auth/login');
         }
 
         $_SESSION['user'] = [

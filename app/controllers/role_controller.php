@@ -36,7 +36,7 @@ class Role extends Controller
             PermissionRole::assign($role_id, $data['permissions']);
         }
 
-        ActivityLog::log($_SESSION['employee_id'], 'add', 'Role', 'Added role ID ' . $role_id); 
+        ActivityLog::log(current_user_id(), 'add', 'Role', 'Added role ID ' . $role_id); 
 
         return $this->redirect('role/index');
     }

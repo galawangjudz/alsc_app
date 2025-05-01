@@ -8,7 +8,7 @@ class Controller
         return new $model();
     }
 
-    protected function view_old($view, $data = [])
+    protected function view_no_layout($view, $data = [])
     {
         extract($data); // This makes keys in $data available as variables
         require_once (__DIR__ . '/../views/' . $view . '.php');

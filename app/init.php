@@ -10,6 +10,7 @@ require_once 'middleware/PermissionMiddleware.php';
 require_once 'utils/Functions.php';
 require_once 'helpers/activity_helper.php';
 require_once 'helpers/notif_helper.php';
+require_once 'helpers/auth_helper.php';
 
 function url($path = '')
 {
