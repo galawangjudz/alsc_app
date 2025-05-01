@@ -47,23 +47,42 @@
             <li class="nav-item mb-2">
                 <a href="<?= url('dashboard/index') ?>" class="nav-link">Home</a>
             </li>
-            <li class="nav-item mb-2">
-                <a href="<?= url('adminuser/user_list') ?>" class="nav-link">Manage Users</a>
-            </li>
-            <li class="nav-item mb-2">
-                <a href="<?= url('permission/index') ?>" class="nav-link">Permissions</a>
-            </li>
-            <li class="nav-item mb-2">
-                <a href="<?= url('role/index') ?>" class="nav-link">Roles</a>
-            </li>
-            <li class="nav-item mb-2">
-                <a href="<?= url('logs/index') ?>" class="nav-link">Activity Logs</a>
-            </li>
+
+            <!-- Dropdown for Users, Permissions, and Roles (only if user has the permission) -->
+            <?php if (can('manage_users') || can('manage_permissions') || can('manage_roles')): ?>
+                <li class="nav-item dropdown mb-2">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-fill"></i> Settings
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
+                        <?php if (can('manage_users')): ?>
+                            <li><a class="dropdown-item text-white" href="<?= url('adminuser/user_list') ?>"><i class="bi bi-person-fill"></i> Manage Users</a></li>
+                        <?php endif; ?>
+                        <?php if (can('manage_permissions')): ?>
+                            <li><a class="dropdown-item text-white" href="<?= url('permission/index') ?>"><i class="bi bi-key-fill"></i> Permissions</a></li>
+                        <?php endif; ?>
+                        <?php if (can('manage_roles')): ?>
+                            <li><a class="dropdown-item text-white" href="<?= url('role/index') ?>"><i class="bi bi-person-lock"></i> Roles</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+
+            <?php endif; ?>
+
+            <!-- Link for Activity Logs (only if user has permission) -->
+            <?php if (can('view_logs')): ?>
+                <li class="nav-item mb-2">
+                    <a href="<?= url('logs/index') ?>" class="nav-link">Activity Logs</a>
+                </li>
+            <?php endif; ?>
+
+            <!-- Logout Link -->
             <li class="nav-item">
                 <a href="<?= url('auth/logout') ?>" class="nav-link text-danger">Logout</a>
             </li>
         </ul>
     </div>
+
 
     <!-- Main Content -->
     <div class="content w-100">

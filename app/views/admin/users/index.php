@@ -23,7 +23,13 @@
                 <td><?= htmlspecialchars($user->role_id) ?></td> <!-- You can join to roles table to show name -->
                 <td><?= htmlspecialchars($user->is_active) ?></td>
                 <td>
-                    <a href="<?= url('adminuser/edit/' . $user->id) ?>" class="btn btn-sm btn-primary">Edit User</a>
+                <?php if (can('edit_user')): ?>
+                    <a href="<?= url('adminuser/edit/'.$user->id) ?>" class="btn btn-sm btn-warning">Edit</a>
+                <?php endif; ?>
+
+                <?php if (can('delete_user')): ?>
+                    <a href="<?= url('adminuser/delete/'.$user->id) ?>" class="btn btn-sm btn-danger">Delete</a>
+                <?php endif; ?>
                 </td>
             </tr>
         <?php endforeach; ?>
