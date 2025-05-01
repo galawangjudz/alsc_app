@@ -1,92 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Admin Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar {
-            min-width: 250px;
-            background: #343a40;
-            min-height: 100vh;
-            color: white;
-        }
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-        }
-        .sidebar a:hover {
-            background: #495057;
-            display: block;
-        }
-        .content {
-            flex-grow: 1;
-            padding: 20px;
-        }
-        footer {
-            background: #f8f9fa;
-            padding: 10px;
-            text-align: center;
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar p-3">
-        <h4>Dashboard</h4>
-        <hr>
-        <ul class="nav flex-column">
-            <li class="nav-item mb-2">
-                <a href="<?= url('dashboard/index')?>" class="nav-link">Home</a>
-            </li>
-            <li class="nav-item mb-2">
-                <a href="<?= url('adminuser/user_list')?>" class="nav-link">Manage Users</a>
-            </li>
-            <li class="nav-item mb-2">
-                <a href="<?= url('permission/index')?>" class="nav-link">Permissions</a>
-            </li>
-            <li class="nav-item mb-2">
-                <a href="<?= url('role/index')?>" class="nav-link">Roles</a>
-            </li>
-            <li class="nav-item mb-2">
-                <a href="<?= url('logs/index')?>" class="nav-link">Activity Logs</a>
-            </li>
-            <li class="nav-item">
-                <a href="<?= url('auth/logout')?>" class="nav-link text-danger">Logout</a>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Main Content -->
-    <div class="content w-100">
-        <!-- Header -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-            <div class="container-fluid">
-                <span class="navbar-brand">Welcome, <?= htmlspecialchars($_SESSION['user']['name']) ?>!</span>
+<div class="container-fluid">
+    <div class="row">
+        <!-- KPI Cards -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h3 class="card-text"><?= $totalUsers ?></h3>
+                </div>
             </div>
-        </nav>
+        </div>
 
-        <!-- Page Content -->
-        <div>
-            <h1>Admin Dashboard</h1>
-            <p>Use the sidebar to navigate.</p>
-
-            <a href="?url=auth/logout" class="btn btn-danger mt-3">Logout</a>
+        <!-- Recent Activity Logs -->
+        <div class="col-md-6 col-xl-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <?php if (empty($activityLogs)): ?>
+                            <li class="list-group-item">No recent activity found.</li>
+                        <?php else: ?>
+                            <?php foreach ($activityLogs as $log): ?>
+                                <li class="list-group-item">
+                                    <?= htmlspecialchars($log['description']) ?> 
+                                    <small class="text-muted"><?= date('Y-m-d H:i', strtotime($log['created_at'])) ?></small>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
-<!-- Footer -->
-<footer>
-    &copy; <?= date('Y') ?> Your Company Name. All rights reserved.
-</footer>
-
-</body>
-</html>

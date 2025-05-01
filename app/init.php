@@ -9,7 +9,7 @@ require_once 'middleware/AdminMiddleware.php';
 require_once 'middleware/PermissionMiddleware.php';
 require_once 'utils/Functions.php';
 require_once 'helpers/activity_helper.php';
-
+require_once 'helpers/notif_helper.php';
 
 function url($path = '')
 {

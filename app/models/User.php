@@ -20,6 +20,18 @@ class User extends Model
 
         return $results;
     }
+    public static function getTotalUsers()
+    {
+        // Assuming you're using PDO for database connection
+     
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT COUNT(*) AS total FROM users WHERE is_active = '1'");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['total'];  // Return the total user count
+    }
+
 
     public static function find($id)
     {

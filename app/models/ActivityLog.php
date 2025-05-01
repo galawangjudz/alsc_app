@@ -20,4 +20,14 @@ class ActivityLog extends Model
         $stmt = $instance->db->prepare("INSERT INTO activity_logs (user_id, action, module, description) VALUES (?, ?, ?, ?)");
         return $stmt->execute([$user_id, $action, $module, $description]);
     }
+
+    public static function recent_logs()
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM activity_logs ORDER BY created_at DESC LIMIT 5");  // Adjust the query to suit your needs
+        $stmt->execute();
+        $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $logs;  // Return an array of recent activity logs
+    }
 }
