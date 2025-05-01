@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../models/Permissions.php';
-#require_once __DIR__ . '/../middleware/AdminMiddleware.php';
+
 
 class permission extends Controller
 {

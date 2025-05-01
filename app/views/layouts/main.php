@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>ALSC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -46,6 +46,15 @@
         <ul class="nav flex-column">
             <li class="nav-item mb-2">
                 <a href="<?= url('dashboard/index') ?>" class="nav-link">Home</a>
+            </li>
+            <li class="nav-item dropdown mb-2">
+                <a class="nav-link dropdown-toggle text-white" href="#" id="inventoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Inventory
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="inventoryDropdown">
+                        <li><a class="dropdown-item" href="<?= url('lot/index') ?>">Lot Inventory</a></li>
+                        <li><a class="dropdown-item" href="<?= url('/houses/index') ?>">House Inventory</a></li>
+                </ul>
             </li>
 
             <!-- Dropdown for Users, Permissions, and Roles (only if user has the permission) -->
