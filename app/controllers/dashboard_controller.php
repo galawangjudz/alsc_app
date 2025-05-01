@@ -5,7 +5,7 @@ class Dashboard extends Controller
     public function index()
     {
         AuthMiddleware::handle(); // Check if logged in
-        $user = $_SESSION['user'];
+        $user = current_user();
         return $this->view('dashboard/index', ['user' => $user]);
     }
 

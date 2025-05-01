@@ -23,7 +23,11 @@
             <?php endforeach; ?>
         </select>
     </div>
+    <div class="mb-3">
+        <label>Status</label>
+        <input type="text" name="is_active" class="form-control" value="<?= htmlspecialchars($user->is_active) ?>" required>
+    </div>
 
     <button class="btn btn-primary">Update</button>
-    <a href="<?= url('adminuser/index')?>" class="btn btn-secondary">Cancel</a>
+    <a href="<?= url('adminuser/user_list')?>" class="btn btn-secondary">Cancel</a>
 </form>

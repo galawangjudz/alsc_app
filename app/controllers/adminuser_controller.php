@@ -24,6 +24,15 @@ class adminuser extends Controller
         $roles = Roles::all();
         return $this->view('admin/users/create', ['roles' => $roles]);
     }
+
+    public function store()
+    {
+        $data = $_POST;
+        User::insert($data);
+        ActivityLog::log(current_user_id(), 'add', 'Role', 'Added employee ID ' . $data['employee_id']); 
+
+        return $this->redirect('adminuser/user_list');
+    }
     public function edit($id)
     {
         $user = User::find($id);
@@ -42,8 +51,9 @@ class adminuser extends Controller
 
         User::update($id, $data);
         $users = User::all();
-       
-        return $this->view('admin/users/index', ['users' => $users]);
+        ActivityLog::log(current_user_id(), 'update', 'Users', 'Updated user id ' . $id);
+        return $this->redirect('adminuser/user_list');
+        #return $this->view('admin/users/index', ['users' => $users]);
         
     }
     public function notfound()

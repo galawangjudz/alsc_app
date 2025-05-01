@@ -14,7 +14,7 @@
         <?php foreach ($logs as $log): ?>
             <tr>
                 <td><?= $log->id ?></td>
-                <td><?= htmlspecialchars($log->user_name ?? 'System') ?></td>
+                <td><?= htmlspecialchars($log->user_id ?? 'System') ?></td>
                 <td><?= htmlspecialchars($log->action) ?></td>
                 <td><?= htmlspecialchars($log->module) ?></td>
                 <td><?= htmlspecialchars($log->description) ?></td>

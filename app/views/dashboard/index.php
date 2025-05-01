@@ -55,6 +55,9 @@
             <li class="nav-item mb-2">
                 <a href="<?= url('role/index')?>" class="nav-link">Roles</a>
             </li>
+            <li class="nav-item mb-2">
+                <a href="<?= url('logs/index')?>" class="nav-link">Activity Logs</a>
+            </li>
             <li class="nav-item">
                 <a href="<?= url('auth/logout')?>" class="nav-link text-danger">Logout</a>
             </li>

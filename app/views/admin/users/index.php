@@ -9,6 +9,7 @@
             <th>Employee ID</th>
             <th>Name</th>
             <th>Role</th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -20,10 +21,9 @@
                 <td><?= htmlspecialchars($user->employee_id) ?></td>
                 <td><?= htmlspecialchars($user->name) ?></td>
                 <td><?= htmlspecialchars($user->role_id) ?></td> <!-- You can join to roles table to show name -->
+                <td><?= htmlspecialchars($user->is_active) ?></td>
                 <td>
-                   
                     <a href="<?= url('adminuser/edit/' . $user->id) ?>" class="btn btn-sm btn-primary">Edit User</a>
-                    <a href="<?= url('adminuser/delete/' . $user->id) ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
                 </td>
             </tr>
         <?php endforeach; ?>

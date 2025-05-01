@@ -36,7 +36,7 @@ class Role extends Controller
             PermissionRole::assign($role_id, $data['permissions']);
         }
 
-        ActivityLog::log($_SESSION['employee_id'], 'add', 'Role', 'Added role ID ' . $data['name']); 
+        ActivityLog::log($_SESSION['employee_id'], 'add', 'Role', 'Added role ID ' . $role_id); 
 
         return $this->redirect('role/index');
     }
@@ -63,7 +63,7 @@ class Role extends Controller
             PermissionRole::assign($id, $data['permissions']);
         }
 
-        ActivityLog::log($_SESSION['employee_id'], 'update', 'Role', 'Updated role ID ' . $id);
+        ActivityLog::log(current_user_id(), 'update', 'Role', 'Updated role ID ' . $id);
 
 
         return $this->redirect('role/index');
@@ -72,7 +72,7 @@ class Role extends Controller
     public function delete($id)
     {
         Roles::delete($id);
-        ActivityLog::log($_SESSION['employee_id'], 'delete', 'Role', 'Deleted role ID ' . $id);
+        ActivityLog::log(current_user_id(), 'delete', 'Role', 'Deleted role ID ' . $id);
         return $this->redirect('role/index');
     }
     public function notfound()

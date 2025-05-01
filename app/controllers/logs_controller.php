@@ -2,7 +2,7 @@
 
 
 
-class Log extends Controller
+class Logs extends Controller
 {
     public function __construct()
     {
