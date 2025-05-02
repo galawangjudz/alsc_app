@@ -43,9 +43,11 @@ class Lot extends Model
     {
         $instance = new static();
         $sql = "
-            SELECT * FROM " . $instance->table . "
-            WHERE CONCAT_WS(' ', site_id, block, lot, status, title, title_owner, previous_owner) LIKE ?
-            ORDER BY id DESC
+            SELECT l.*, h.model AS house_model
+            FROM lots l
+            LEFT JOIN houses h ON h.lot_id = l.id
+            WHERE CONCAT(l.block, ' ', l.lot, ' ', l.status, ' ', l.site_id) LIKE ?
+            ORDER BY l.id DESC
             LIMIT 100
         ";
         $stmt = $instance->db->prepare($sql);
