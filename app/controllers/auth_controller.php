@@ -73,4 +73,16 @@ class auth extends Controller
     {
         $this->view('404_page');
     }
+
+    public function markAsRead() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
+            $notificationId = $_POST['id'];
+            
+            // Call the Notification model method to mark the notification as read
+            Notification::markAsRead($notificationId);
+            
+            // Optionally, send a response if needed
+            echo json_encode(['status' => 'success']);
+        }
+    }
 }

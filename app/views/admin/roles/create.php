@@ -19,6 +19,6 @@
         </div>
 
         <button type="submit" class="btn btn-success">Save</button>
-        <a href="<?= url('admin/role') ?>" class="btn btn-secondary">Cancel</a>
+        <a href="<?= url('role/index') ?>" class="btn btn-secondary">Cancel</a>
     </form>
 </div>

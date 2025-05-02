@@ -1,14 +1,26 @@
 <?php 
+require_once __DIR__ . '/../core/Model.php';
 
+class Notification extends Model {
 
-function flash()
-{
-    if (isset($_SESSION['flash'])) {
-        $type = $_SESSION['flash']['type'];
-        $message = $_SESSION['flash']['message'];
+    protected $table = 'notifications';
 
-        echo "<div class='alert alert-{$type}'>{$message}</div>";
+    public static function send($user_id, $message) {
+        $instance = new static();
+        $stmt = $instance->db->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
+        $stmt->execute([$user_id, $message]);
+    }
 
-        unset($_SESSION['flash']); // Clear after showing
+    public static function unread($user_id) {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC");
+        $stmt->execute([$user_id]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public static function markAsRead($id) {
+        $instance = new static();
+        $stmt = $instance->db->prepare("UPDATE notifications SET is_read = 1 WHERE id = ?");
+        $stmt->execute([$id]);
     }
 }

@@ -24,13 +24,16 @@ class Inventory extends Controller
 
         $data = $_POST;
         $userId = current_user_id();
+        
 
         if (!empty($data['id'])) {
             Lot::update($data['id'], $data);
             ActivityLog::log($userId, 'update', 'Lot', 'Updated lot ID ' . $data['id']);
+            Notification::send('10093', 'Lot #' . $lot->id . ' was deleted by ' .  $_SESSION['user']['name']);
         } else {
             $data['id'] = Lot::insert($data);
             ActivityLog::log($userId, 'create', 'Lot', 'Created new lot with number ' . $data['lot']);
+            Notification::send('10093', 'New lot #' . $data['id'] . ' added by ' .  $_SESSION['user']['name']);
         }
 
         header('Location: ' . url('inventory/manage/' . $data['id']));
