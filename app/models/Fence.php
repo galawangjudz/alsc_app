@@ -6,6 +6,21 @@ class Fence extends Model
 {
     protected $table = 'fences';
 
+    public static function count()
+    {
+        $instance = new static();
+        $stmt = $instance->db->query("SELECT COUNT(*) FROM fences");
+        return $stmt->fetchColumn();
+    }
+
+    public static function findByLot($lot_id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM fences WHERE lot_id = ?");
+        $stmt->execute([$lot_id]);
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
     public static function insert($data)
     {
         $instance = new static();

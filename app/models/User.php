@@ -6,6 +6,7 @@ class User extends Model
 {
     protected $table = 'users';
 
+
     public static function all()
     {
         $instance = new static();
@@ -20,7 +21,7 @@ class User extends Model
 
         return $results;
     }
-    public static function getTotalUsers()
+    public static function count()
     {
         // Assuming you're using PDO for database connection
      

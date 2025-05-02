@@ -5,6 +5,16 @@ class House extends Model
 {
     protected $table = 'houses';
 
+
+    public static function count()
+    {
+        $instance = new static();
+        $stmt = $instance->db->query("SELECT COUNT(*) FROM houses");
+        return $stmt->fetchColumn();
+    }
+
+
+    
     public static function all()
     {
         $instance = new static();

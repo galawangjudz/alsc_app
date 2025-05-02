@@ -4,6 +4,14 @@ require_once __DIR__ . '/../core/Model.php';
 class Lot extends Model
 {
     protected $table = 'lots';
+    
+    public static function count()
+    {
+        $instance = new static();
+        $stmt = $instance->db->query("SELECT COUNT(*) FROM lots");
+        return $stmt->fetchColumn();
+    }
+
 
     public static function all()
     {

@@ -23,10 +23,14 @@ class Inventory extends Controller
         AuthMiddleware::handle();
 
         $data = $_POST;
+        $userId = current_user_id();
+
         if (!empty($data['id'])) {
             Lot::update($data['id'], $data);
+            ActivityLog::log($userId, 'update', 'Lot', 'Updated lot ID ' . $data['id']);
         } else {
             $data['id'] = Lot::insert($data);
+            ActivityLog::log($userId, 'create', 'Lot', 'Created new lot with number ' . $data['lot']);
         }
 
         header('Location: ' . url('inventory/manage/' . $data['id']));
@@ -35,15 +39,15 @@ class Inventory extends Controller
   
     public function delete_lot($id)
     {
-        // Check if the lot exists
+        $userId = current_user_id();
         $lot = Lot::find($id);
         if ($lot) {
-            // First delete related records in the dependent tables
-            AdditionalCost::delete($id);  // Delete additional costs associated with this lot
-            Fence::delete($id);           // Delete fences associated with this lot
-            House::delete($id);           // Delete houses associated with this lot
-            // Now delete the lot itself
+            AdditionalCost::delete($id);
+            Fence::delete($id);
+            House::delete($id);
             Lot::delete($id);
+
+            ActivityLog::log($userId, 'delete', 'Lot', 'Deleted lot ID ' . $id);
         }
 
         header('Location: ' . url('inventory/index'));
@@ -55,12 +59,15 @@ class Inventory extends Controller
         AuthMiddleware::handle();
 
         $data = $_POST;
+        $userId = current_user_id();
         $existing = House::findByLot($data['lot_id']);
 
         if ($existing) {
             House::update($existing->id, $data);
+            ActivityLog::log($userId, 'update', 'House', 'Updated house on lot ID ' . $data['lot_id']);
         } else {
             House::insert($data);
+            ActivityLog::log($userId, 'create', 'House', 'Added house to lot ID ' . $data['lot_id']);
         }
 
         header('Location: ' . url('inventory/manage/' . $data['lot_id']));
@@ -70,27 +77,32 @@ class Inventory extends Controller
     public function add_fence()
     {
         AuthMiddleware::handle();
-
+    
         $data = $_POST;
         Fence::insert($data);
-
+    
+        ActivityLog::log(current_user_id(), 'create', 'Fence', 'Added fence to lot ID ' . $data['lot_id']);
+    
         header('Location: ' . url('inventory/manage/' . $data['lot_id']));
         exit;
     }
+    
 
     public function delete_fence($id)
     {
         AuthMiddleware::handle();
-
+    
         $fence = Fence::find($id);
         if ($fence) {
             Fence::delete($id);
+            ActivityLog::log(current_user_id(), 'delete', 'Fence', 'Deleted fence ID ' . $id);
             header('Location: ' . url('inventory/manage/' . $fence->lot_id));
         } else {
             header('Location: ' . url('inventory/index'));
         }
         exit;
     }
+    
 
     public function add_cost()
     {
@@ -98,6 +110,8 @@ class Inventory extends Controller
 
         $data = $_POST;
         AdditionalCost::insert($data);
+
+        ActivityLog::log(current_user_id(), 'create', 'AdditionalCost', 'Added cost to lot ID ' . $data['lot_id']);
 
         header('Location: ' . url('inventory/manage/' . $data['lot_id']));
         exit;
@@ -110,12 +124,14 @@ class Inventory extends Controller
         $cost = AdditionalCost::find($id);
         if ($cost) {
             AdditionalCost::delete($id);
+            ActivityLog::log(current_user_id(), 'delete', 'AdditionalCost', 'Deleted cost ID ' . $id);
             header('Location: ' . url('inventory/manage/' . $cost->lot_id));
         } else {
             header('Location: ' . url('inventory/index'));
         }
         exit;
     }
+
 
 
     public function search()

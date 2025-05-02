@@ -5,6 +5,21 @@ class AdditionalCost extends Model
 {
     protected $table = 'additional_costs';
 
+    public static function count()
+    {
+        $instance = new static();
+        $stmt = $instance->db->query("SELECT COUNT(*) FROM additional_costs");
+        return $stmt->fetchColumn();
+    }
+
+    public static function findByLot($lot_id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM additional_costs WHERE lot_id = ?");
+        $stmt->execute([$lot_id]);
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+    
     public static function insert($data)
     {
         $instance = new static();
