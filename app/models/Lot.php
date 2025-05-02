@@ -8,7 +8,8 @@ class Lot extends Model
     public static function all()
     {
         $instance = new static();
-        $stmt = $instance->db->query("SELECT * FROM lots");
+        $stmt = $instance->db->prepare("SELECT * FROM lots ORDER BY id DESC");
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
@@ -20,11 +21,82 @@ class Lot extends Model
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
+
+
     public static function insert($data)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("INSERT INTO lots (block_number, lot_number, area, status) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$data['block_number'], $data['lot_number'], $data['area'], $data['status']]);
+        $stmt = $instance->db->prepare("
+            INSERT INTO lots (site_id, block, lot, lot_area, price_per_sqm, status, remarks, title, title_owner, previous_owner)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $data['site_id'], $data['block'], $data['lot'], $data['lot_area'],
+            $data['price_per_sqm'], $data['status'], $data['remarks'] ?? '',
+            $data['title'] ?? '', $data['title_owner'] ?? '', $data['previous_owner'] ?? ''
+        ]);
         return $instance->db->lastInsertId();
     }
+
+
+    public static function search($query)
+    {
+        $instance = new static();
+        $sql = "
+            SELECT * FROM " . $instance->table . "
+            WHERE CONCAT_WS(' ', site_id, block, lot, status, title, title_owner, previous_owner) LIKE ?
+            ORDER BY id DESC
+            LIMIT 100
+        ";
+        $stmt = $instance->db->prepare($sql);
+        $stmt->execute(['%' . $query . '%']);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public static function update($id, $data)
+    {
+        $instance = new static();
+    
+        // Define which fields are allowed to be updated
+        $allowedFields = [
+            'site_id', 'block', 'lot', 'lot_area', 'price_per_sqm',
+            'status', 'remarks', 'title', 'title_owner', 'previous_owner'
+        ];
+    
+        $fields = [];
+        $values = [];
+    
+        foreach ($allowedFields as $field) {
+            if (isset($data[$field])) {
+                $fields[] = "$field = ?";
+                $values[] = $data[$field];
+            }
+        }
+    
+        if (empty($fields)) {
+            throw new Exception("No valid fields to update.");
+        }
+    
+        $values[] = $id;
+        $sql = "UPDATE {$instance->table} SET " . implode(', ', $fields) . " WHERE id = ?";
+        $stmt = $instance->db->prepare($sql);
+    
+        return $stmt->execute($values);
+    }
+    
+
+
+    public static function delete($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("DELETE FROM " . $instance->table . " WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
+
+    
+
+
+
 }
+
+

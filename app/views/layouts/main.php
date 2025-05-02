@@ -47,16 +47,10 @@
             <li class="nav-item mb-2">
                 <a href="<?= url('dashboard/index') ?>" class="nav-link">Home</a>
             </li>
-            <li class="nav-item dropdown mb-2">
-                <a class="nav-link dropdown-toggle text-white" href="#" id="inventoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Inventory
-                </a>
-                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="inventoryDropdown">
-                        <li><a class="dropdown-item" href="<?= url('lot/index') ?>">Lot Inventory</a></li>
-                        <li><a class="dropdown-item" href="<?= url('/houses/index') ?>">House Inventory</a></li>
-                </ul>
+        
+            <li class="nav-item mb-2">
+                <a href="<?= url('inventory/index') ?>" class="nav-link">Inventory</a>
             </li>
-
             <!-- Dropdown for Users, Permissions, and Roles (only if user has the permission) -->
             <?php if (can('manage_users') || can('manage_permissions') || can('manage_roles')): ?>
                 <li class="nav-item dropdown mb-2">
