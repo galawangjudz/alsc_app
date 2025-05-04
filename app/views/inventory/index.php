@@ -23,9 +23,16 @@
     </thead>
     <tbody>
         <?php if (!empty($inventory)): ?>
+            <?php
+            // Create a mapping of c_code to c_acronym
+            $projectAcronyms = [];
+            foreach ($projects as $project) {
+                $projectAcronyms[$project->c_code] = $project->c_acronym;
+            }
+            ?>
             <?php foreach ($inventory as $item): ?>
                 <tr>
-                    <td><?= $item->site_id ?></td>
+                    <td><?= $projectAcronyms[$item->site_id] ?? $item->site_id ?></td>
                     <td><?= $item->block ?></td>
                     <td><?= $item->lot ?></td>
                     <td><?= $item->lot_area ?></td>

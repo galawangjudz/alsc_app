@@ -1,5 +1,5 @@
 <?php
-
+require_once __DIR__ . '/../models/Projects.php';
 require_once __DIR__ . '/../models/Lot.php';
 require_once __DIR__ . '/../models/House.php';
 require_once __DIR__ . '/../models/Fence.php';
@@ -13,7 +13,8 @@ class Inventory extends Controller
         AuthMiddleware::handle();
         $search = $_GET['q'] ?? '';
         $lots = Lot::search($search); // Assume this method handles both all and filtered search
-        return $this->view('inventory/index', ['inventory' => $lots]);
+        $projects = Projects::all();
+        return $this->view('inventory/index', ['inventory' => $lots,'projects'=> $projects]);
     }
 
 
@@ -25,7 +26,6 @@ class Inventory extends Controller
         $data = $_POST;
         $userId = current_user_id();
         
-
         if (!empty($data['id'])) {
             Lot::update($data['id'], $data);
             ActivityLog::log($userId, 'update', 'Lot', 'Updated lot ID ' . $data['id']);
@@ -156,8 +156,8 @@ class Inventory extends Controller
         $house = $lot ? House::findByLot($id) : null;
         $fences = $lot ? Fence::where('lot_id', $id) : [];
         $costs = $lot ? AdditionalCost::where('lot_id', $id) : [];
-
-        return $this->view('inventory/manage', compact('lot', 'house', 'fences', 'costs'));
+        $projects = Projects::all();
+        return $this->view('inventory/manage', compact('lot', 'house', 'fences', 'costs','projects'));
     }
 
 

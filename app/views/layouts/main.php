@@ -96,6 +96,9 @@
                 <li class="nav-item mb-2">
                     <a href="<?= url('inventory/index') ?>" class="nav-link">Inventory</a>
                 </li>
+                <li class="nav-item mb-2">
+                    <a href="<?= url('adminagent/index') ?>" class="nav-link">Agent List</a>
+                </li>
                 <!-- Dropdown for Users, Permissions, and Roles (only if user has the permission) -->
                 <?php if (can('manage_users') || can('manage_permissions') || can('manage_roles')): ?>
                     <li class="nav-item dropdown mb-2">

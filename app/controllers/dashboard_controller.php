@@ -57,7 +57,7 @@ class Dashboard extends Controller
                 if ($hasHouse) $classifiedLots['Sold']['withHouse']++;
                 if ($hasFence) $classifiedLots['Sold']['withFence']++;
                 if ($hasAddCost) $classifiedLots['Sold']['withAddCost']++;
-            } elseif ($lotStatus === 'on hold') {
+            } elseif ($lotStatus === 'On Hold') {
                 $classifiedLots['On Hold']['total']++;
                 if ($hasHouse) $classifiedLots['On Hold']['withHouse']++;
                 if ($hasFence) $classifiedLots['On Hold']['withFence']++;

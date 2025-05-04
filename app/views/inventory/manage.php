@@ -2,9 +2,18 @@
 
 <form method="POST" action="<?= url('inventory/save_lot') ?>">
     <input type="hidden" name="id" value="<?= $lot->id ?? '' ?>">
-    <label>Site:</label>
-    <input type="text" name="site_id" value="<?= $lot->site_id ?? '' ?>" required><br>
 
+    <label>Phase:</label>
+    <select name="site_id" required>
+        <option value="">-- Select Project --</option>
+        <?php foreach ($projects as $project): ?>
+            <option value="<?= $project->c_code ?>" 
+                <?= ($lot->site_id ?? '') == $project->c_code ? 'selected' : '' ?>>
+                <?= $project->c_acronym ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+    <br>
     <label>Block:</label>
     <input type="text" name="block" value="<?= $lot->block ?? '' ?>" required><br>
 
@@ -15,13 +24,33 @@
     <input type="text" name="lot_area" value="<?= $lot->lot_area ?? '' ?>" required><br>
 
     <label>Status:</label>
-    <input type="text" name="status" value="<?= $lot->status ?? '' ?>" required><br>
+    <select name="status" required>
+        <?php
+        $statuses = ['Available', 'On Hold', 'Sold', 'Reservation'];
+        foreach ($statuses as $status):
+        ?>
+            <option value="<?= $status ?>" <?= ($lot->status ?? '') == $status ? 'selected' : '' ?>>
+                <?= $status ?>
+            </option>
+        <?php endforeach; ?>
+    </select><br>
+
+    <label>Title Status:</label>
+    <select name="title">
+        <option value="">-- Select Title Status --</option>
+        <option value="With Title" <?= ($lot->title ?? '') == 'With Title' ? 'selected' : '' ?>>With Title</option>
+        <option value="Without Title" <?= ($lot->title?? '') == 'Without Title' ? 'selected' : '' ?>>Without Title</option>
+    </select><br>
+
+    <label>Title Owner:</label>
+    <input type="text" name="title_owner" value="<?= $lot->title_owner ?? '' ?>"><br>
 
     <label>Remarks:</label>
     <textarea name="remarks"><?= $lot->remarks ?? '' ?></textarea><br>
 
     <button type="submit"><?= isset($lot) ? 'Update Lot' : 'Create Lot' ?></button>
 </form>
+
 
 <hr>
 
