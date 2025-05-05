@@ -17,6 +17,14 @@
         <label for="c_position">Position</label>
         <input type="text" name="c_position" id="c_position" class="form-control" value="<?= htmlspecialchars($agent->c_position) ?>">
     </div>
+    <div class="form-group">
+        <label for="c_rate">Rate</label>
+        <input type="text" name="c_rate" id="c_rate" class="form-control" value="<?= htmlspecialchars($agent->c_rate) ?>">
+    </div>
+    <div class="form-group">
+        <label for="c_withholding_tax">With Holding Tax</label>
+        <input type="text" name="c_withholding_tax" id="c_withholding_tax" class="form-control" value="<?= htmlspecialchars($agent->c_withholding_tax) ?>">
+    </div>
     <!-- Add other fields as necessary -->
     <button type="submit" class="btn btn-primary">Update</button>
     <a href="<?= url('adminagent/index') ?>" class="btn btn-secondary">Cancel</a>

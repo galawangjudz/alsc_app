@@ -24,22 +24,34 @@ class Agent extends Model
     public static function insert($data)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("
+        // Define the fields expected in the database
+        $fields = [
+            'c_code', 'c_last_name', 'c_first_name', 'c_middle_initial', 'c_nick_name',
+            'c_sex', 'c_birthdate', 'c_birth_place', 'c_address_ln1', 'c_address_ln2',
+            'c_tel_no', 'c_civil_status', 'c_sss_no', 'c_tin', 'c_status',
+            'c_recruited_by', 'c_hire_date', 'c_position', 'c_network', 'c_division',
+            'c_rate', 'c_withholding_tax'
+        ];
+
+        // Initialize an array to hold the parameters
+        $params = [];
+
+        // Loop through each field and assign the corresponding value from $data or null
+        foreach ($fields as $field) {
+            $params[":$field"] = isset($data[$field]) ? $data[$field] : null;
+        }
+
+        // Prepare the SQL statement
+        $sql = "
             INSERT INTO t_agents (
-                c_code, c_last_name, c_first_name, c_middle_initial, c_nick_name,
-                c_sex, c_birthdate, c_birth_place, c_address_ln1, c_address_ln2,
-                c_tel_no, c_civil_status, c_sss_no, c_tin, c_status,
-                c_recruited_by, c_hire_date, c_position, c_network, c_division,
-                c_rate, c_withholding_tax
+                " . implode(', ', $fields) . "
             ) VALUES (
-                :c_code, :c_last_name, :c_first_name, :c_middle_initial, :c_nick_name,
-                :c_sex, :c_birthdate, :c_birth_place, :c_address_ln1, :c_address_ln2,
-                :c_tel_no, :c_civil_status, :c_sss_no, :c_tin, :c_status,
-                :c_recruited_by, :c_hire_date, :c_position, :c_network, :c_division,
-                :c_rate, :c_withholding_tax
+                " . implode(', ', array_keys($params)) . "
             )
-        ");
-        return $stmt->execute($data);
+        ";
+
+        $stmt = $instance->db->prepare($sql);
+        return $stmt->execute($params);
     }
 
     public static function update($id, $data)

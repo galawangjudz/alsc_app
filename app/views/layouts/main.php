@@ -94,6 +94,9 @@
                     <a href="<?= url('dashboard/index') ?>" class="nav-link">Home</a>
                 </li>
                 <li class="nav-item mb-2">
+                    <a href="<?= url('reservation/index') ?>" class="nav-link">Reservation</a>
+                </li>
+                <li class="nav-item mb-2">
                     <a href="<?= url('inventory/index') ?>" class="nav-link">Inventory</a>
                 </li>
                 <li class="nav-item mb-2">

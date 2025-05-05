@@ -17,6 +17,14 @@
         <label for="c_position">Position</label>
         <input type="text" name="c_position" id="c_position" class="form-control">
     </div>
+    <div class="form-group">
+        <label for="c_rate">Rate</label>
+        <input type="text" name="c_rate" id="c_rate" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="c_withholding_tax">WithHolding Tax</label>
+        <input type="text" name="c_withholding_tax" id="c_withholding_tax" class="form-control">
+    </div>
     <!-- Add other fields as necessary -->
     <button type="submit" class="btn btn-success">Save</button>
     <a href="<?= url('adminagent/index') ?>" class="btn btn-secondary">Cancel</a>
