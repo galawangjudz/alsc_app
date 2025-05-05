@@ -18,28 +18,31 @@ class Inventory extends Controller
         return $this->view('inventory/index', ['inventory' => $lots,'projects'=> $projects]);
     }
     
-    public function model_house_list()
-    {
-        AuthMiddleware::handle();
-        $model_house = HouseModel::all();
-        return $this->view('inventory/model_house/index', ['model_houses' => $model_houses]);
-    }
 
     public function model_house()
     {
         AuthMiddleware::handle();
-        $model_house = HouseModel::all();
+        $model_houses = HouseModel::all();
         return $this->view('inventory/model_house/index', ['model_houses' => $model_houses]);
     }
 
-    public function model_house_delete()
+    public function model_house_delete($id)
     {
         AuthMiddleware::handle();
-        HouseModel::delete();
+        HouseModel::delete($id);
         ActivityLog::log($userId, 'delete', 'Model House', 'Deleted Model House ID ' . $id);
         header('Location: ' . url('inventory/model_house/index'));
         exit;
     }
+
+    public function model_house_manage($id = null)
+    {
+        AuthMiddleware::handle();
+  
+        $model_house = $id ? HouseModel::find($id) : null;
+        return $this->view('inventory/model_house/manage',['model_house' => $model_house]);
+    }
+
 
     public function save_model_house()
     {

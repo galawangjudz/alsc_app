@@ -9,46 +9,59 @@ class HouseModel extends Model
     public static function all()
     {
         $instance = new static();
-        $stmt = $instance->db->query("SELECT * FROM t_model_house");
-        return $stmt->fetchColumn();
+        $stmt = $instance->db->prepare("SELECT * FROM {$instance->table}");
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_OBJ);
+    }
+
+     public static function find($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM {$instance->table} WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(\PDO::FETCH_OBJ);
     }
 
     public static function insert($data)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("
-            INSERT INTO t_model_house (c_code, c_model, c_acronym)
-            VALUES (?, ?, ?)
-        ");
+        $stmt = $instance->db->prepare("INSERT INTO {$instance->table} (c_code, c_acronym, c_model) VALUES (?, ?, ?)");
         $stmt->execute([
-            $data['c_code'], $data['c_model'], $data['c_acronym']
+            $data['c_code'],
+            $data['c_acronym'],
+            $data['c_model']
         ]);
         return $instance->db->lastInsertId();
     }
-  
     public static function update($id, $data)
     {
         $instance = new static();
-        $fields = array_keys($data);
 
-        // Safely remove 'id' if it exists
-        if (($key = array_search('id', $fields)) !== false) {
-            unset($fields[$key]);
+        // Dynamically create the SET clause for the SQL query
+        $setClause = '';
+        $params = [];
+        foreach ($data as $key => $value) {
+            $setClause .= "{$key} = ?, "; // Add each field to the SET clause
+            $params[] = $value; // Append the value to the params array
         }
 
-        $set = implode(', ', array_map(fn($f) => "$f = ?", $fields));
-        $values = array_map(fn($f) => $data[$f], $fields);
-        $values[] = $id;
+        // Remove the trailing comma and space from the SET clause
+        $setClause = rtrim($setClause, ', ');
 
-        $sql = "UPDATE " . $instance->table . " SET $set WHERE id = ?";
-        $stmt = $instance->db->prepare($sql);
-        return $stmt->execute($values);
+        // Prepare the SQL statement
+        $stmt = $instance->db->prepare("UPDATE {$instance->table} SET {$setClause} WHERE id = ?");
+        
+        // Append the ID value to the params array
+        $params[] = $id;
+
+        // Execute the statement
+        return $stmt->execute($params);
     }
 
     public static function delete($id)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("DELETE FROM " . $instance->table . " WHERE id = ?");
+        $stmt = $instance->db->prepare("DELETE FROM {$instance->table} WHERE id = ?");
         return $stmt->execute([$id]);
     }
 }

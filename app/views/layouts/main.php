@@ -99,9 +99,7 @@
                 <li class="nav-item mb-2">
                     <a href="<?= url('inventory/index') ?>" class="nav-link">Inventory</a>
                 </li>
-                <li class="nav-item mb-2">
-                    <a href="<?= url('adminagent/index') ?>" class="nav-link">Agent List</a>
-                </li>
+              
                 <!-- Dropdown for Users, Permissions, and Roles (only if user has the permission) -->
                 <?php if (can('manage_users') || can('manage_permissions') || can('manage_roles')): ?>
                     <li class="nav-item dropdown mb-2">
@@ -109,6 +107,8 @@
                             <i class="bi bi-gear-fill"></i> Settings
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item text-white" href="<?= url('inventory/model_house') ?>"><i class="bi bi-person-fill"></i> House Model</a></li>
+                            <li><a class="dropdown-item text-white" href="<?= url('adminagent/index') ?>"><i class="bi bi-person-fill"></i> Agent List</a></li>
                             <?php if (can('manage_users')): ?>
                                 <li><a class="dropdown-item text-white" href="<?= url('adminuser/user_list') ?>"><i class="bi bi-person-fill"></i> Manage Users</a></li>
                             <?php endif; ?>
