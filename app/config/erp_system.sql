@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 04, 2025 at 05:45 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Generation Time: May 05, 2025 at 10:53 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -176,7 +176,19 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `action`, `module`, `description`,
 (133, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-04 18:18:19'),
 (134, 10093, 'update', 'Users', 'Updated user id 4', '2025-05-04 18:35:29'),
 (135, 10093, 'update', 'Role', 'Updated role ID 7', '2025-05-04 18:35:56'),
-(136, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-04 20:08:13');
+(136, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-04 20:08:13'),
+(137, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-05 08:04:23'),
+(138, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-05 15:14:28'),
+(139, 10093, 'update', 'Agent', 'Updated agent id 1', '2025-05-05 15:15:00'),
+(140, 10093, 'update', 'Agent', 'Updated agent id 1', '2025-05-05 15:15:05'),
+(141, 10093, 'update', 'Agent', 'Updated agent id 1', '2025-05-05 15:15:11'),
+(142, 10093, 'add', 'Agent', 'Added agent with code 12345', '2025-05-05 15:59:51'),
+(143, 10093, 'update', 'Agent', 'Updated agent id 1', '2025-05-05 15:59:58'),
+(144, 10093, 'update', 'Agent', 'Updated agent id 3', '2025-05-05 16:00:02'),
+(145, 10093, 'update', 'Agent', 'Updated agent id 8', '2025-05-05 16:00:04'),
+(146, 10093, 'delete', 'Agent', 'Deleted agent id 394', '2025-05-05 16:00:23'),
+(147, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-05 16:00:53'),
+(148, 10093, 'delete', 'Agent', 'Deleted agent id 225', '2025-05-05 16:01:15');
 
 -- --------------------------------------------------------
 
@@ -389,6 +401,40 @@ INSERT INTO `permission_role` (`role_id`, `permission_id`) VALUES
 (7, 14),
 (7, 15),
 (7, 16);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reservations`
+--
+
+CREATE TABLE `reservations` (
+  `id` int(11) NOT NULL,
+  `buyer1_name` varchar(100) NOT NULL,
+  `buyer1_contact` varchar(50) NOT NULL,
+  `buyer2_name` varchar(100) DEFAULT NULL,
+  `buyer2_contact` varchar(50) DEFAULT NULL,
+  `address` text NOT NULL,
+  `lot_id` int(11) NOT NULL,
+  `house_id` int(11) DEFAULT NULL,
+  `fence` tinyint(1) DEFAULT 0,
+  `down_payment` decimal(12,2) NOT NULL,
+  `term_months` int(11) NOT NULL,
+  `status` enum('pending','validated','approved','booked') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reservation_agents`
+--
+
+CREATE TABLE `reservation_agents` (
+  `reservation_id` int(11) NOT NULL,
+  `agent_code` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -674,7 +720,6 @@ INSERT INTO `t_agents` (`id`, `c_code`, `c_last_name`, `c_first_name`, `c_middle
 (222, 111863, 'Santiago', 'Rhodora', '', '', 'Female', '2013-04-22', '', '', '', '', 'Single', '', '', 'Active', '', '2013-04-24', 'MA', 'ACHIEVERS', 'Adrenaline', 0, 0),
 (223, 111864, 'Danga', 'Demy', '', '', 'Male', '2013-02-22', '', '', '', '', 'Single', '', '', 'Active', '', '2013-04-24', 'MA', 'ACHIEVERS', 'Amazing', 0, 0),
 (224, 111867, 'Ocampo', 'Lolita', '', '', 'Female', '2013-04-24', '', '', '', '', 'Single', '', '', 'Active', '', '2013-04-24', 'MA', 'ACHIEVERS', 'Achievers - Direct', 0, 0),
-(225, 111870, 'Balauag', 'Candelaria', 'D', '', 'Female', '2013-04-25', '', '', '', '', 'Single', '', '', 'Active', '', '2013-04-26', 'MA', 'ACHIEVERS', 'Awesome', 0, 0),
 (226, 111873, 'Alberto', 'Rica', 'C', '', 'Female', '2013-04-28', '', '', '', '', 'Single', '', '', 'Active', '', '2013-04-29', 'MA', 'ACHIEVERS', 'Awesome', 0, 0),
 (227, 111896, 'Canto', 'Eulogia', '', '', 'Female', '2013-05-09', '', '', '', '', 'Single', '', '', 'Active', '', '2013-05-10', 'MA', 'ACHIEVERS', 'Adrenaline', 0, 0),
 (228, 111905, 'De Leon', 'Osmond', 'L', '', 'Male', '2013-05-21', '', '', '', '', 'Single', '', '', 'Active', '', '2013-05-22', 'PC', 'VP/DIRECTOR OF SALES', 'Sm/pc', 3, 0),
@@ -739,9 +784,9 @@ INSERT INTO `t_agents` (`id`, `c_code`, `c_last_name`, `c_first_name`, `c_middle
 (287, 112715, 'Fajardo', 'Cherry Rose', 'B', '', 'Female', '2014-09-30', '', '', '', '', 'Single', '', '', 'Active', '', '2014-10-10', 'MA', 'ACHIEVERS', 'Amazing', 0, 0),
 (288, 112716, 'Banaban', 'Alona', '', '', 'Female', '2014-09-30', '', '', '', '', 'Single', '', '', 'Active', '', '2014-10-10', 'MA', 'ACHIEVERS', 'Awesome', 0, 0),
 (289, 112727, 'Mabini', 'Karen', '', '', 'Female', '2014-09-30', '', '', '', '', 'Single', '', '', 'Active', '', '2014-10-13', 'MA', 'ACHIEVERS', 'Achievers - Direct', 0, 0),
-(290, 112763, 'Dawang', 'Regina', '', '', 'Female', '1899-12-31', '', '', '', '', 'Single', '', '', 'Active', '', '2014-11-10', 'MA', 'ACHIEVERS', 'Awesome', 0, 0);
+(290, 112763, 'Dawang', 'Regina', '', '', 'Female', '1899-12-31', '', '', '', '', 'Single', '', '', 'Active', '', '2014-11-10', 'MA', 'ACHIEVERS', 'Awesome', 0, 0),
+(291, 112770, 'Rodriguez', 'Alma', 'R', '', 'Female', '2014-10-31', '', '', '', '', 'Single', '', '', 'Active', '', '2014-11-12', 'MA', 'ACHIEVERS', 'Awesome', 0, 0);
 INSERT INTO `t_agents` (`id`, `c_code`, `c_last_name`, `c_first_name`, `c_middle_initial`, `c_nick_name`, `c_sex`, `c_birthdate`, `c_birth_place`, `c_address_ln1`, `c_address_ln2`, `c_tel_no`, `c_civil_status`, `c_sss_no`, `c_tin`, `c_status`, `c_recruited_by`, `c_hire_date`, `c_position`, `c_network`, `c_division`, `c_rate`, `c_withholding_tax`) VALUES
-(291, 112770, 'Rodriguez', 'Alma', 'R', '', 'Female', '2014-10-31', '', '', '', '', 'Single', '', '', 'Active', '', '2014-11-12', 'MA', 'ACHIEVERS', 'Awesome', 0, 0),
 (292, 112784, 'Angeles', 'Lenita', '', '', 'Female', '2014-11-13', '', '', '', '', 'Single', '', '', 'Active', '', '2014-11-20', 'MA', 'ACHIEVERS', 'Adrenaline', 0, 0),
 (293, 112794, 'Felipe', 'Maria Vilma', 'S', '', 'Female', '2014-11-25', '', '', '', '', 'Single', '', '', 'Active', '', '2014-11-27', 'MA', 'ACHIEVERS', 'Adrenaline', 0, 0),
 (294, 112857, 'Vice President', 'Sales', '', '', 'Male', '2015-01-01', '', '', '', '', 'Single', '', '', 'Active', '', '2015-01-01', 'VPS', 'VP/DIRECTOR OF SALES', 'Sm/pc', 0, 0),
@@ -1049,6 +1094,21 @@ ALTER TABLE `permission_role`
   ADD KEY `permission_id` (`permission_id`);
 
 --
+-- Indexes for table `reservations`
+--
+ALTER TABLE `reservations`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `lot_id` (`lot_id`),
+  ADD KEY `house_id` (`house_id`);
+
+--
+-- Indexes for table `reservation_agents`
+--
+ALTER TABLE `reservation_agents`
+  ADD PRIMARY KEY (`reservation_id`,`agent_code`),
+  ADD KEY `agent_code` (`agent_code`);
+
+--
 -- Indexes for table `roles`
 --
 ALTER TABLE `roles`
@@ -1059,7 +1119,8 @@ ALTER TABLE `roles`
 -- Indexes for table `t_agents`
 --
 ALTER TABLE `t_agents`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `c_code` (`c_code`);
 
 --
 -- Indexes for table `users`
@@ -1077,7 +1138,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=137;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=149;
 
 --
 -- AUTO_INCREMENT for table `additional_costs`
@@ -1116,6 +1177,12 @@ ALTER TABLE `permissions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
+-- AUTO_INCREMENT for table `reservations`
+--
+ALTER TABLE `reservations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
@@ -1125,7 +1192,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `t_agents`
 --
 ALTER TABLE `t_agents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=394;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=395;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -1161,6 +1228,20 @@ ALTER TABLE `houses`
 ALTER TABLE `permission_role`
   ADD CONSTRAINT `permission_role_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`),
   ADD CONSTRAINT `permission_role_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`);
+
+--
+-- Constraints for table `reservations`
+--
+ALTER TABLE `reservations`
+  ADD CONSTRAINT `reservations_ibfk_1` FOREIGN KEY (`lot_id`) REFERENCES `lots` (`id`),
+  ADD CONSTRAINT `reservations_ibfk_2` FOREIGN KEY (`house_id`) REFERENCES `houses` (`id`);
+
+--
+-- Constraints for table `reservation_agents`
+--
+ALTER TABLE `reservation_agents`
+  ADD CONSTRAINT `reservation_agents_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `reservation_agents_ibfk_2` FOREIGN KEY (`agent_code`) REFERENCES `t_agents` (`c_code`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `users`
