@@ -86,7 +86,7 @@
 
 <!-- Footer -->
 <footer>
-    &copy; <?= date('Y') ?> Your Company Name. All rights reserved.
+    &copy; <?= date('Y') ?> ALSC. All rights reserved.
 </footer>
 
 </body>

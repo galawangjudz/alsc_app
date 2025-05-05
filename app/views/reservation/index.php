@@ -1,6 +1,6 @@
 <h2>Reservations</h2>
 
-<a href="/reservation/create" class="btn btn-primary mb-3">+ New Reservation</a>
+<a href="<?= url('reservation/create') ?>" class="btn btn-primary mb-3">+ New Reservation</a>
 
 <table class="table table-bordered table-striped">
     <thead class="thead-dark">
@@ -27,9 +27,9 @@
                     <td><?= $res->term_months ?> months</td>
                     <td><span class="badge bg-<?= getStatusColor($res->status) ?>"><?= ucfirst($res->status) ?></span></td>
                     <td>
-                        <a href="/reservation/view/<?= $res->id ?>" class="btn btn-sm btn-info">View</a>
-                        <a href="/reservation/edit/<?= $res->id ?>" class="btn btn-sm btn-warning">Edit</a>
-                        <a href="/reservation/delete/<?= $res->id ?>" onclick="return confirm('Delete this reservation?')" class="btn btn-sm btn-danger">Delete</a>
+                        <a href="<?= url('reservation/view/'. $res->id )?>" class="btn btn-sm btn-info">View</a>
+                        <a href="<?= url('reservation/edit/'. $res->id )?>" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="<?= url('reservation/delete/'. $res->id ) ?>" onclick="return confirm('Delete this reservation?')" class="btn btn-sm btn-danger">Delete</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

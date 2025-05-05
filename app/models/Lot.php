@@ -21,6 +21,14 @@ class Lot extends Model
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
+    public static function all_available()
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM lots WHERE status = 'Available' ORDER BY id DESC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
     public static function find($id)
     {
         $instance = new static();

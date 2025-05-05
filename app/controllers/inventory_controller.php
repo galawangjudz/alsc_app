@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../models/Projects.php';
 require_once __DIR__ . '/../models/Lot.php';
 require_once __DIR__ . '/../models/House.php';
+require_once __DIR__ . '/../models/HouseModel.php';
 require_once __DIR__ . '/../models/Fence.php';
 require_once __DIR__ . '/../models/AdditionalCost.php';
 require_once __DIR__ . '/../core/Controller.php'; // Assuming you have a base Controller class
@@ -16,9 +17,51 @@ class Inventory extends Controller
         $projects = Projects::all();
         return $this->view('inventory/index', ['inventory' => $lots,'projects'=> $projects]);
     }
-
-
     
+    public function model_house_list()
+    {
+        AuthMiddleware::handle();
+        $model_house = HouseModel::all();
+        return $this->view('inventory/model_house/index', ['model_houses' => $model_houses]);
+    }
+
+    public function model_house()
+    {
+        AuthMiddleware::handle();
+        $model_house = HouseModel::all();
+        return $this->view('inventory/model_house/index', ['model_houses' => $model_houses]);
+    }
+
+    public function model_house_delete()
+    {
+        AuthMiddleware::handle();
+        HouseModel::delete();
+        ActivityLog::log($userId, 'delete', 'Model House', 'Deleted Model House ID ' . $id);
+        header('Location: ' . url('inventory/model_house/index'));
+        exit;
+    }
+
+    public function save_model_house()
+    {
+        AuthMiddleware::handle();
+        $data = $_POST;
+        $userId = current_user_id();
+        
+        if (!empty($data['id'])) {
+            HouseModel::update($data['id'], $data);
+            ActivityLog::log($userId, 'update', 'Model House', 'Model House ID ' . $data['id']);
+            Notification::send('10093', 'House Model #' . $data['c_model'] . ' was updated by ' .  $_SESSION['user']['name']);
+        } else {
+            $data['id'] = HouseModel::insert($data);
+            ActivityLog::log($userId, 'create', 'Lot', 'Created new lot with number ' . $data['lot']);
+            Notification::send('10093', 'New lot #' . $data['c_model'] . ' added by ' .  $_SESSION['user']['name']);
+        }
+
+        header('Location: ' . url('inventory/model_house/index' . $data['id']));
+        exit;
+    }
+
+
     public function save_lot()
     {
         AuthMiddleware::handle();
@@ -29,7 +72,7 @@ class Inventory extends Controller
         if (!empty($data['id'])) {
             Lot::update($data['id'], $data);
             ActivityLog::log($userId, 'update', 'Lot', 'Updated lot ID ' . $data['id']);
-            Notification::send('10093', 'Lot #' . $lot->id . ' was deleted by ' .  $_SESSION['user']['name']);
+            Notification::send('10093', 'Lot #' . $lot->id . ' was updated by ' .  $_SESSION['user']['name']);
         } else {
             $data['id'] = Lot::insert($data);
             ActivityLog::log($userId, 'create', 'Lot', 'Created new lot with number ' . $data['lot']);

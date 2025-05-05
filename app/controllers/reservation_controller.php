@@ -1,6 +1,6 @@
 <?php
-
 require_once __DIR__ . '/../models/Reservations.php';
+require_once __DIR__ . '/../models/Projects.php';
 require_once __DIR__ . '/../models/Lot.php';
 require_once __DIR__ . '/../models/House.php';
 require_once __DIR__ . '/../models/Agent.php';
@@ -21,16 +21,17 @@ class Reservation extends Controller
     }
     public function create()
     {
-        $lots = Lot::allAvailable();
+        $projects = Projects::all();
+        $lots = Lot::all_available();
         $houses = House::all();
         $agents = Agent::all();
-        return $this->view('reservation/create', ['lots' => $lots, 'houses' => $houses, 'agents' => $agents]);
+        return $this->view('reservation/create', ['projects' => $projects, 'lots' => $lots, 'houses' => $houses, 'agents' => $agents]);
     }
 
     public function edit($id)
     {
         $reservation = Reservations::find($id);
-        $lots = Lot::allAvailable();
+        $lots = Lot::all_available();
         $houses = House::all();
         $agents = Agent::all();
         return $this->view('reservation/edit', compact('reservation', 'lots', 'houses', 'agents'));
