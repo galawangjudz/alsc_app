@@ -28,6 +28,7 @@ class Inventory extends Controller
 
     public function model_house_delete($id)
     {
+        $userId = current_user_id();
         AuthMiddleware::handle();
         HouseModel::delete($id);
         ActivityLog::log($userId, 'delete', 'Model House', 'Deleted Model House ID ' . $id);
@@ -56,7 +57,7 @@ class Inventory extends Controller
             Notification::send('10093', 'House Model #' . $data['c_model'] . ' was updated by ' .  $_SESSION['user']['name']);
         } else {
             $data['id'] = HouseModel::insert($data);
-            ActivityLog::log($userId, 'create', 'Lot', 'Created new lot with number ' . $data['lot']);
+            ActivityLog::log($userId, 'create', 'Lot', 'Created new model house with number ' . $data['lot']);
             Notification::send('10093', 'New lot #' . $data['c_model'] . ' added by ' .  $_SESSION['user']['name']);
         }
 
