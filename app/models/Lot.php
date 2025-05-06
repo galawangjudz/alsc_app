@@ -24,7 +24,19 @@ class Lot extends Model
     public static function all_available()
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("SELECT * FROM lots WHERE status = 'Available' ORDER BY id DESC");
+        $sql = "
+           SELECT 
+                l.*, 
+                hi.id AS house_id,
+                hi.price_per_sqm AS house_price,
+                hi.floor_area AS house_floor_area,
+                hi.model as house_model
+            FROM lots l
+            LEFT JOIN houses hi ON hi.lot_id = l.id
+            WHERE l.status = 'Available'
+            ORDER BY l.id DESC
+        ";
+        $stmt = $instance->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }

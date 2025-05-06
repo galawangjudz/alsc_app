@@ -30,15 +30,18 @@
 
                     <div class="form-group">
                         <label for="lot_id">Select Lot</label>
-                        <select name="lot_id" id="lot_id" class="form-control">
+                        <select name="lot_id" id="lot_id" class="form-control" required>
                             <option value="">-- Select Lot --</option>
                             <?php foreach ($lots as $lot): ?>
                                 <option 
                                     value="<?= $lot->id ?>"
                                     data-area="<?= $lot->lot_area ?>"
                                     data-amount="<?= $lot->lot_area * $lot->price_per_sqm ?>"
-                                    data-discount="<?= $lot->discount ?? 0 ?>"
                                     data-lcp="<?= ($lot->lot_area * $lot->price_per_sqm) - ($lot->discount ?? 0) ?>"
+                                    data-house-id="<?= $lot->house_id ?? '' ?>"
+                                    data-house-model="<?= $lot->house_model ?? '' ?>"
+                                    data-house-price="<?= $lot->house_price ?? '' ?>"
+                                    data-floor-area="<?= $lot->house_floor_area ?? '' ?>"
                                 >
                                     <?= $projectAcronyms[$lot->site_id] ?? $lot->site_id ?> - Block <?= $lot->block ?> Lot <?= $lot->lot ?>
                                 </option>
@@ -53,7 +56,7 @@
 
                     <div class="form-group">
                         <label>Lot Amount (₱)</label>
-                        <input type="text" id="lot_amount_display" class="form-control currency-format" data-hidden-id="lot_amount">
+                        <input type="text" id="lot_amount_display" class="form-control currency-format" data-hidden-id="lot_amount" readonly>
                         <input type="hidden" name="lot_amount" id="lot_amount">
                     </div>
 
@@ -77,21 +80,21 @@
                         <label>House Model</label>
                         <select name="house_id" id="house_id" class="form-control">
                             <option value="">-- Select House --</option>
-                            <?php foreach ($houses as $house): ?>
-                                <option 
-                                    value="<?= $house->id ?>" 
-                                    data-price="<?= $house->price ?>"
-                                    data-floor="<?= $house->floor_area ?>"
-                                >
-                                    <?= $house->model ?> 
+                            <?php foreach ($house_models as $house): ?>
+                                <option value="<?= $house->c_acronym?>">
+                                    <?= $house->c_model ?> 
                                 </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>House Model</label>
+                        <input type="text" name= "house_model" id="house_model" class="form-control" readonly >
+                    </div>
 
                     <div class="form-group">
                         <label>House Contract Price (₱)</label>
-                        <input type="text" id="house_price_display" class="form-control currency-format" data-hidden-id="house_price" readonly>
+                        <input type="text" id="house_price_display" class="form-control currency-format" data-hidden-id="house_price" >
                         <input type="hidden" name="house_price" id="house_price">
                     </div>
 
@@ -110,11 +113,6 @@
                 <!-- Fence -->
                 <fieldset>
                     <legend>Fence</legend>
-                    <div class="form-check">
-                        <input type="checkbox" name="has_fence" id="has_fence" class="form-check-input">
-                        <label for="has_fence" class="form-check-label">Include Fence</label>
-                    </div>
-
                     <div class="form-group">
                         <label>Fence Cost (₱)</label>
                         <input type="text" id="fence_cost_display" class="form-control currency-format" data-hidden-id="fence_cost">
@@ -229,5 +227,86 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
+<script>
+const houseModels = <?= json_encode($house_models) ?>;
+
+document.getElementById('lot_id').addEventListener('change', function () {
+    const selected = this.options[this.selectedIndex];
+
+    const area = selected.getAttribute('data-area');
+    const amount = selected.getAttribute('data-amount');
+    const lcp = selected.getAttribute('data-lcp');
+    const discount = selected.getAttribute('data-discount') || 0;
+
+    document.getElementById('lot_area').value = area;
+    document.getElementById('lot_amount').value = amount;
+    document.getElementById('lot_amount_display').value = amount;
+    document.getElementById('lot_discount').value = discount;
+    document.getElementById('lot_discount_display').value = discount;
+    document.getElementById('lcp').value = lcp;
+    document.getElementById('lcp_display').value = lcp;
+
+    // House Details
+    const houseId = selected.getAttribute('data-house-id');
+    const houseModelText = selected.getAttribute('data-house-model');
+    const housePrice = selected.getAttribute('data-house-price');
+    const floorArea = selected.getAttribute('data-floor-area');
+    const houseDiscount = selected.getAttribute('data-house-discount') || 0;
+
+    const houseSelect = document.getElementById('house_id');
+    const houseModelInput = document.getElementById('house_model');
+
+    // Reset select
+    houseSelect.innerHTML = '';
+
+    // Add placeholder
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = '-- Select House --';
+    houseSelect.appendChild(defaultOption);
+
+    if (houseId) {
+        const matched = houseModels.find(h => h.c_acronym === houseId);
+        const option = document.createElement('option');
+        option.value = houseId;
+        option.textContent = matched ? matched.c_model : houseModelText;
+        option.selected = true;
+        houseSelect.appendChild(option);
+        houseSelect.disabled = true;
+
+        houseSelect.value = houseId;
+        houseModelInput.value = houseModelText;
+        document.getElementById('house_price').value = housePrice;
+        document.getElementById('house_price_display').value = housePrice;
+        document.getElementById('floor_area').value = floorArea;
+        document.getElementById('house_discount').value = houseDiscount;
+        document.getElementById('house_discount_display').value = houseDiscount;
+    } else {
+        houseModels.forEach(house => {
+            const option = document.createElement('option');
+            option.value = house.c_acronym;
+            option.textContent = house.c_model;
+            houseSelect.appendChild(option);
+        });
+        houseSelect.disabled = false;
+
+        houseSelect.value = '';
+        houseModelInput.value = '';
+        document.getElementById('house_price').value = '';
+        document.getElementById('house_price_display').value = '';
+        document.getElementById('floor_area').value = '';
+        document.getElementById('house_discount').value = '';
+        document.getElementById('house_discount_display').value = '';
+    }
+});
+</script>
+
+<script>
+    document.getElementById('house_id').addEventListener('change', function () {
+        const selectedOption = this.options[this.selectedIndex];
+        const modelText = selectedOption.textContent || '';
+        document.getElementById('house_model').value = modelText;
+    });
+</script>
 
 

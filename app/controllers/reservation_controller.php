@@ -3,6 +3,7 @@ require_once __DIR__ . '/../models/Reservations.php';
 require_once __DIR__ . '/../models/Projects.php';
 require_once __DIR__ . '/../models/Lot.php';
 require_once __DIR__ . '/../models/House.php';
+require_once __DIR__ . '/../models/HouseModel.php';
 require_once __DIR__ . '/../models/Agent.php';
 #require_once __DIR__ . '/../helpers/PDFHelper.php';
 
@@ -24,17 +25,20 @@ class Reservation extends Controller
         $projects = Projects::all();
         $lots = Lot::all_available();
         $houses = House::all();
+        $house_models = HouseModel::all();
         $agents = Agent::all();
-        return $this->view('reservation/create', ['projects' => $projects, 'lots' => $lots, 'houses' => $houses, 'agents' => $agents]);
+        return $this->view('reservation/create', ['projects' => $projects, 'lots' => $lots, 'houses' => $houses,'house_models' => $house_models, 'agents' => $agents]);
     }
 
     public function edit($id)
     {
         $reservation = Reservations::find($id);
+        $projects = Projects::all();
         $lots = Lot::all_available();
         $houses = House::all();
+        $house_models = HouseModel::all();
         $agents = Agent::all();
-        return $this->view('reservation/edit', compact('reservation', 'lots', 'houses', 'agents'));
+        return $this->view('reservation/edit', compact('reservation', 'lots', 'houses', 'house_models','agents'));
     }
 
     public function store()
