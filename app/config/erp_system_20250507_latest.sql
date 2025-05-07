@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2025 at 10:53 AM
+-- Generation Time: May 07, 2025 at 06:19 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -188,7 +188,15 @@ INSERT INTO `activity_logs` (`id`, `user_id`, `action`, `module`, `description`,
 (145, 10093, 'update', 'Agent', 'Updated agent id 8', '2025-05-05 16:00:04'),
 (146, 10093, 'delete', 'Agent', 'Deleted agent id 394', '2025-05-05 16:00:23'),
 (147, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-05 16:00:53'),
-(148, 10093, 'delete', 'Agent', 'Deleted agent id 225', '2025-05-05 16:01:15');
+(148, 10093, 'delete', 'Agent', 'Deleted agent id 225', '2025-05-05 16:01:15'),
+(149, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-06 08:12:07'),
+(150, 10093, 'create', 'Fence', 'Added fence to lot ID 6', '2025-05-06 08:19:28'),
+(151, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-06 13:11:32'),
+(152, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-07 08:37:09'),
+(153, 10093, 'logout', 'Auth', 'User logged out', '2025-05-07 08:38:48'),
+(154, 10093, 'login', 'Auth', 'User Admin User logged in', '2025-05-07 08:39:30'),
+(155, 10093, 'create', 'Lot', 'Created new lot with number 3', '2025-05-07 08:42:46'),
+(156, 10093, 'create', 'House', 'Added house to lot ID 13', '2025-05-07 08:43:27');
 
 -- --------------------------------------------------------
 
@@ -233,7 +241,8 @@ CREATE TABLE `fences` (
 
 INSERT INTO `fences` (`id`, `lot_id`, `fence_type`, `material`, `length`, `cost`, `remarks`) VALUES
 (2, 4, '1', '1', 1.00, 1.00, NULL),
-(3, 12, 'a', '1', 1.00, 3313.00, NULL);
+(3, 12, 'a', '1', 1.00, 3313.00, NULL),
+(4, 6, 'te', '1', 1.00, 1.00, NULL);
 
 -- --------------------------------------------------------
 
@@ -259,7 +268,8 @@ CREATE TABLE `houses` (
 
 INSERT INTO `houses` (`id`, `lot_id`, `model`, `floor_area`, `price_per_sqm`, `status`, `unit_status`, `house_type`, `remarks`) VALUES
 (2, 2, 'Annika', 159.00, 12222.00, 'Available', 'For Construction', NULL, NULL),
-(3, 4, 'Annika', 120.00, 15000.00, 'Sold', 'For Construction', NULL, NULL);
+(3, 4, 'Annika', 120.00, 15000.00, 'Sold', 'For Construction', NULL, NULL),
+(4, 13, 'CASA FELIA', 76.00, 100000.00, '100000', 'Ready For Occupancy', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -288,16 +298,17 @@ CREATE TABLE `lots` (
 
 INSERT INTO `lots` (`id`, `site_id`, `block`, `lot`, `lot_area`, `price_per_sqm`, `status`, `remarks`, `title`, `title_owner`, `previous_owner`, `created_at`) VALUES
 (1, 152, 2, 2, 120.00, 10000.00, 'Available', 'test', 'With Title', 'ALSC', 'MT-CBG', '2025-05-02 09:36:54'),
-(2, 152, 2, 3, 120.00, NULL, 'Available', 'test', NULL, NULL, NULL, '2025-05-02 10:00:44'),
-(4, 152, 2, 1, 120.00, NULL, 'Sold', 'test', '', '', '', '2025-05-02 10:56:03'),
-(5, 152, 10, 1, 100.00, NULL, 'On Hold', 'test', '', '', '', '2025-05-02 14:47:41'),
-(6, 152, 12, 13, 12313.00, NULL, 'Available', 'test', '', '', '', '2025-05-02 14:51:25'),
-(7, 152, 12, 1, 121334.00, NULL, 'Sold', 'test', '', '', '', '2025-05-02 14:54:02'),
-(8, 152, 14, 4, 100.00, NULL, 'On Hold', 'test', '', '', '', '2025-05-02 15:19:25'),
-(9, 152, 12, 1, 100.00, NULL, 'Sold', 'test', '', '', '', '2025-05-02 15:19:54'),
-(10, 152, 112, 12, 100.00, NULL, 'Available', 'rt', '', '', '', '2025-05-02 16:13:28'),
-(11, 107, 12, 2, 120.00, NULL, 'Available', 'test', 'With Title', 'ALSC', '', '2025-05-04 08:11:11'),
-(12, 102, 2, 1, 120.00, NULL, 'Sold', 'test', 'Without Title', 'ALSC', '', '2025-05-04 08:33:47');
+(2, 152, 2, 3, 120.00, 15000.00, 'Available', 'test', NULL, NULL, NULL, '2025-05-02 10:00:44'),
+(4, 152, 2, 1, 120.00, 3000.00, 'Sold', 'test', '', '', '', '2025-05-02 10:56:03'),
+(5, 152, 10, 1, 100.00, 2000.00, 'On Hold', 'test', '', '', '', '2025-05-02 14:47:41'),
+(6, 152, 12, 13, 70.00, 30000.00, 'Available', 'test', '', '', '', '2025-05-02 14:51:25'),
+(7, 152, 12, 1, 1234.00, 10000.00, 'Sold', 'test', '', '', '', '2025-05-02 14:54:02'),
+(8, 152, 14, 4, 100.00, 40000.00, 'On Hold', 'test', '', '', '', '2025-05-02 15:19:25'),
+(9, 152, 12, 1, 100.00, 50000.00, 'Sold', 'test', '', '', '', '2025-05-02 15:19:54'),
+(10, 152, 112, 12, 100.00, 11000.00, 'Available', 'rt', '', '', '', '2025-05-02 16:13:28'),
+(11, 107, 12, 2, 120.00, 10500.00, 'Available', 'test', 'With Title', 'ALSC', '', '2025-05-04 08:11:11'),
+(12, 102, 2, 1, 120.00, 10000.00, 'Sold', 'test', 'Without Title', 'ALSC', '', '2025-05-04 08:33:47'),
+(13, 101, 2, 3, 100.00, NULL, 'Available', '', 'With Title', 'ALSC', '', '2025-05-07 00:42:46');
 
 -- --------------------------------------------------------
 
@@ -327,7 +338,8 @@ INSERT INTO `notifications` (`id`, `user_id`, `message`, `is_read`, `created_at`
 (7, 10093, 'New lot #11 added by Admin User', 1, '2025-05-04 08:11:11'),
 (8, 10093, 'Lot # was deleted by Admin User', 1, '2025-05-04 08:17:38'),
 (9, 10093, 'Lot # was deleted by Admin User', 1, '2025-05-04 08:19:10'),
-(10, 10093, 'New lot #12 added by Admin User', 1, '2025-05-04 08:33:47');
+(10, 10093, 'New lot #12 added by Admin User', 1, '2025-05-04 08:33:47'),
+(11, 10093, 'New lot #13 added by Admin User', 1, '2025-05-07 00:42:46');
 
 -- --------------------------------------------------------
 
@@ -893,6 +905,32 @@ INSERT INTO `t_agents` (`id`, `c_code`, `c_last_name`, `c_first_name`, `c_middle
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `t_model_house`
+--
+
+CREATE TABLE `t_model_house` (
+  `id` int(11) NOT NULL,
+  `c_code` int(11) NOT NULL,
+  `c_model` text NOT NULL,
+  `c_acronym` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_model_house`
+--
+
+INSERT INTO `t_model_house` (`id`, `c_code`, `c_model`, `c_acronym`) VALUES
+(1, 100, 'NATHALIA', 'NAT'),
+(2, 101, 'ANNIKA', 'ANK'),
+(3, 102, 'SASHA', 'SAS'),
+(4, 104, 'FENCE', 'FNC'),
+(5, 105, 'FREYA', 'FRY'),
+(7, 988, 'ZINNIA', 'ZNA'),
+(8, 111, 'CASA JUDZ', 'JUD');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `t_projects`
 --
 
@@ -1123,6 +1161,12 @@ ALTER TABLE `t_agents`
   ADD UNIQUE KEY `c_code` (`c_code`);
 
 --
+-- Indexes for table `t_model_house`
+--
+ALTER TABLE `t_model_house`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -1138,7 +1182,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=149;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=157;
 
 --
 -- AUTO_INCREMENT for table `additional_costs`
@@ -1150,25 +1194,25 @@ ALTER TABLE `additional_costs`
 -- AUTO_INCREMENT for table `fences`
 --
 ALTER TABLE `fences`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `houses`
 --
 ALTER TABLE `houses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `lots`
 --
 ALTER TABLE `lots`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `permissions`
@@ -1193,6 +1237,12 @@ ALTER TABLE `roles`
 --
 ALTER TABLE `t_agents`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=395;
+
+--
+-- AUTO_INCREMENT for table `t_model_house`
+--
+ALTER TABLE `t_model_house`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `users`
