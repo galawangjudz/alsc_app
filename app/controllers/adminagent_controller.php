@@ -6,7 +6,8 @@ class AdminAgent extends Controller
 {
     public function __construct()
     {
-        AdminMiddleware::handle();
+        AuthMiddleware::handle();
+ 
     }
 
     public function index()

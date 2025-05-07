@@ -6,6 +6,7 @@ class Logs extends Controller
 {
     public function __construct()
     {
+        AuthMiddleware::handle();
         AdminMiddleware::handle(); // Only admins
     }
 

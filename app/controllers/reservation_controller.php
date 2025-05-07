@@ -11,6 +11,7 @@ class Reservation extends Controller
 {
     public function __construct()
     {
+        AuthMiddleware::handle();
         // Any necessary middleware can be added here
         // AdminMiddleware::handle();
     }

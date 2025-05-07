@@ -9,19 +9,21 @@ require_once __DIR__ . '/../core/Controller.php'; // Assuming you have a base Co
 
 class Inventory extends Controller
 {
+    public function __construct()
+    {
+        AuthMiddleware::handle(); // Run this once on every controller method call
+    }
+
     public function index()
     {
-        AuthMiddleware::handle();
         $search = $_GET['q'] ?? '';
-        $lots = Lot::search($search); // Assume this method handles both all and filtered search
+        $lots = Lot::search($search);
         $projects = Projects::all();
         return $this->view('inventory/index', ['inventory' => $lots,'projects'=> $projects]);
     }
-    
 
     public function model_house()
     {
-        AuthMiddleware::handle();
         $model_houses = HouseModel::all();
         return $this->view('inventory/model_house/index', ['model_houses' => $model_houses]);
     }
@@ -29,7 +31,6 @@ class Inventory extends Controller
     public function model_house_delete($id)
     {
         $userId = current_user_id();
-        AuthMiddleware::handle();
         HouseModel::delete($id);
         ActivityLog::log($userId, 'delete', 'Model House', 'Deleted Model House ID ' . $id);
         header('Location: ' . url('inventory/model_house/index'));
@@ -38,19 +39,15 @@ class Inventory extends Controller
 
     public function model_house_manage($id = null)
     {
-        AuthMiddleware::handle();
-  
         $model_house = $id ? HouseModel::find($id) : null;
         return $this->view('inventory/model_house/manage',['model_house' => $model_house]);
     }
 
-
     public function save_model_house()
     {
-        AuthMiddleware::handle();
         $data = $_POST;
         $userId = current_user_id();
-        
+
         if (!empty($data['id'])) {
             HouseModel::update($data['id'], $data);
             ActivityLog::log($userId, 'update', 'Model House', 'Model House ID ' . $data['id']);
@@ -65,18 +62,15 @@ class Inventory extends Controller
         exit;
     }
 
-
     public function save_lot()
     {
-        AuthMiddleware::handle();
-
         $data = $_POST;
         $userId = current_user_id();
-        
+
         if (!empty($data['id'])) {
             Lot::update($data['id'], $data);
             ActivityLog::log($userId, 'update', 'Lot', 'Updated lot ID ' . $data['id']);
-            Notification::send('10093', 'Lot #' . $lot->id . ' was updated by ' .  $_SESSION['user']['name']);
+            Notification::send('10093', 'Lot #' . $data['id'] . ' was updated by ' .  $_SESSION['user']['name']);
         } else {
             $data['id'] = Lot::insert($data);
             ActivityLog::log($userId, 'create', 'Lot', 'Created new lot with number ' . $data['lot']);
@@ -86,7 +80,7 @@ class Inventory extends Controller
         header('Location: ' . url('inventory/manage/' . $data['id']));
         exit;
     }
-  
+
     public function delete_lot($id)
     {
         $userId = current_user_id();
@@ -106,8 +100,6 @@ class Inventory extends Controller
 
     public function save_house()
     {
-        AuthMiddleware::handle();
-
         $data = $_POST;
         $userId = current_user_id();
         $existing = House::findByLot($data['lot_id']);
@@ -126,22 +118,17 @@ class Inventory extends Controller
 
     public function add_fence()
     {
-        AuthMiddleware::handle();
-    
         $data = $_POST;
         Fence::insert($data);
-    
+
         ActivityLog::log(current_user_id(), 'create', 'Fence', 'Added fence to lot ID ' . $data['lot_id']);
-    
+
         header('Location: ' . url('inventory/manage/' . $data['lot_id']));
         exit;
     }
-    
 
     public function delete_fence($id)
     {
-        AuthMiddleware::handle();
-    
         $fence = Fence::find($id);
         if ($fence) {
             Fence::delete($id);
@@ -152,12 +139,9 @@ class Inventory extends Controller
         }
         exit;
     }
-    
 
     public function add_cost()
     {
-        AuthMiddleware::handle();
-
         $data = $_POST;
         AdditionalCost::insert($data);
 
@@ -169,8 +153,6 @@ class Inventory extends Controller
 
     public function delete_cost($id)
     {
-        AuthMiddleware::handle();
-
         $cost = AdditionalCost::find($id);
         if ($cost) {
             AdditionalCost::delete($id);
@@ -181,8 +163,6 @@ class Inventory extends Controller
         }
         exit;
     }
-
-
 
     public function search()
     {
@@ -197,8 +177,6 @@ class Inventory extends Controller
 
     public function manage($id = null)
     {
-        AuthMiddleware::handle();
-
         $lot = $id ? Lot::find($id) : null;
         $house = $lot ? House::findByLot($id) : null;
         $fences = $lot ? Fence::where('lot_id', $id) : [];
@@ -206,10 +184,5 @@ class Inventory extends Controller
         $projects = Projects::all();
         return $this->view('inventory/manage', compact('lot', 'house', 'fences', 'costs','projects'));
     }
-
-
-    
-
-  
-
 }
+

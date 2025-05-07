@@ -10,6 +10,7 @@ class Role extends Controller
 {
     public function __construct()
     {
+        AuthMiddleware::handle();
         AdminMiddleware::handle();
     }
 

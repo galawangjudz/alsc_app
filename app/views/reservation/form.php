@@ -145,14 +145,7 @@
                     <label>Buyer 1 Contact</label>
                     <input type="text" name="buyer1_contact" class="form-control" value="<?= $reservation->buyer1_contact ?? '' ?>" required>
                 </div>
-                <div class="form-group">
-                    <label>Buyer 2 Name (optional)</label>
-                    <input type="text" name="buyer2_name" class="form-control" value="<?= $reservation->buyer2_name ?? '' ?>">
-                </div>
-                <div class="form-group">
-                    <label>Buyer 2 Contact</label>
-                    <input type="text" name="buyer2_contact" class="form-control" value="<?= $reservation->buyer2_contact ?? '' ?>">
-                </div>
+              
                 <div class="form-group">
                     <label>Address</label>
                     <textarea name="address" class="form-control" required><?= $reservation->address ?? '' ?></textarea>
