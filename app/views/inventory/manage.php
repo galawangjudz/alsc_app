@@ -47,7 +47,7 @@
 
     <label>Remarks:</label>
     <textarea name="remarks"><?= $lot->remarks ?? '' ?></textarea><br>
-
+    <?= Csrf::getTokenInputField(); ?>
     <button type="submit"><?= isset($lot) ? 'Update Lot' : 'Create Lot' ?></button>
 </form>
 

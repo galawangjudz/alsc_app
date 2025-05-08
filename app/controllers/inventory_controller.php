@@ -66,6 +66,9 @@ class Inventory extends Controller
     {
         $data = $_POST;
         $userId = current_user_id();
+        if (!isset($_POST['csrf_token']) || !Csrf::validateToken($_POST['csrf_token'])) {
+            die('CSRF validation failed. Are you trying to hack me, bro? 🕵️‍♂️');
+        }
 
         if (!empty($data['id'])) {
             Lot::update($data['id'], $data);
@@ -76,7 +79,7 @@ class Inventory extends Controller
             ActivityLog::log($userId, 'create', 'Lot', 'Created new lot with number ' . $data['lot']);
             Notification::send('10093', 'New lot #' . $data['id'] . ' added by ' .  $_SESSION['user']['name']);
         }
-
+        Csrf::invalidateToken();
         header('Location: ' . url('inventory/manage/' . $data['id']));
         exit;
     }

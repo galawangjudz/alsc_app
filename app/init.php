@@ -11,6 +11,7 @@ require_once 'utils/Functions.php';
 require_once 'helpers/activity_helper.php';
 require_once 'helpers/notif_helper.php';
 require_once 'helpers/auth_helper.php';
+require_once 'helpers/csrf.php';
 
 function url($path = '')
 {
