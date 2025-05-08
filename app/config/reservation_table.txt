@@ -1,0 +1,77 @@
+CREATE TABLE buyers_account_draft (
+    id SERIAL PRIMARY KEY,
+
+    -- Reservation & Account
+    reservation_no VARCHAR(50) UNIQUE,
+    account_no VARCHAR(50),
+    lot_id INTEGER NOT NULL REFERENCES lots(id),
+    date_of_sale DATE,
+
+    -- Account Type
+    account_type VARCHAR(50),
+    account_type_secondary VARCHAR(50),
+
+    -- Lot Pricing
+    lot_area NUMERIC(10, 2),
+    lot_price_per_sqm NUMERIC(12, 2),
+    lot_discount_percent NUMERIC(5, 2),
+    lot_discount_amount NUMERIC(12, 2),
+
+    -- House Pricing
+    house_model VARCHAR(100),
+    floor_area NUMERIC(10, 2),
+    house_price_per_sqm NUMERIC(12, 2),
+    house_discount_percent NUMERIC(5, 2),
+    house_discount_amount NUMERIC(12, 2),
+
+    -- TCP and Discounts
+    tcp_discount_percent NUMERIC(5, 2),
+    tcp_discount_amount NUMERIC(12, 2),
+    total_contract_price NUMERIC(14, 2),
+    vat_amount NUMERIC(12, 2),
+    net_total_contract_price NUMERIC(14, 2),
+
+    -- Payment
+    reservation_fee NUMERIC(12, 2),
+    payment_type_primary VARCHAR(50),
+    payment_type_secondary VARCHAR(50),
+
+    -- Downpayment
+    down_payment_percent NUMERIC(5, 2),
+    net_down_payment NUMERIC(12, 2),
+    number_of_payments INTEGER,
+    monthly_down_payment NUMERIC(12, 2),
+    first_down_payment_date DATE,
+    full_down_payment_due_date DATE,
+
+    -- Financing
+    amount_financed NUMERIC(14, 2),
+    financing_terms_months INTEGER,
+    interest_rate NUMERIC(5, 2),
+    fixed_factor NUMERIC(10, 6),
+    monthly_amortization NUMERIC(14, 2),
+    amortization_start_date DATE,
+
+    -- Workflow Status & Tracking
+    status VARCHAR(30) DEFAULT 'draft' CHECK (
+        status IN (
+            'draft', 'validated', 'voided', 'approved_coo', 'disapproved_coo',
+            'paid_partial', 'paid_full', 'approved_ca', 'disapproved_ca',
+            'for_revision', 'approved_cfo', 'booked'
+        )
+    ),
+    current_step VARCHAR(30) DEFAULT 'agent' CHECK (
+        current_step IN ('agent', 'sales', 'coo', 'cashier', 'credit_assessment', 'cfo')
+    ),
+    approval_cycle INT DEFAULT 1,
+
+    -- Voiding Info
+    is_voided BOOLEAN DEFAULT FALSE,
+    voided_by INTEGER REFERENCES users(id),
+    void_reason TEXT,
+    voided_at TIMESTAMP,
+
+    -- Audit Timestamps
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
