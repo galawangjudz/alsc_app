@@ -1,8 +1,15 @@
 <div class="container">
-    <?php $projectAcronyms = [];
+    <?php 
+    $projectAcronyms = [];
     foreach ($projects as $project) {
         $projectAcronyms[$project->c_code] = $project->c_acronym;
-    } ?>
+
+    } 
+    $agentsMap = [];
+    foreach ($agents as $a) {
+        $agentsMap[$a->id] = $a;
+    }
+   ?>
 
 
     <form action="<?= $isEdit ? '/reservation/update/' . $reservation->id : '/reservation/store' ?>" method="POST">
@@ -155,6 +162,29 @@
            
             <!-- Step 3: Payment Computation -->
             <fieldset>
+                <legend>Payment Scheme</legend>
+                <div class="form-group">
+                    <label for="payment_type_primary">Primary Payment Type:</label>
+                    <select name="payment_type_primary" id="payment_type_primary" class="form-control" required>
+                        <option value="">-- Select --</option>
+                        <option value="PD">Partial DownPayment</option>
+                        <option value="FD">Full DownPayment</option>
+                        <option value="ND">No Downpayment</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="payment_type_secondary">Secondary Payment Type:</label>
+                    <select name="payment_type_secondary" id="payment_type_secondary" class="form-control">
+                        <option value="">-- Select --</option>
+                        <option value="MA">Monthly Amortization</option>
+                        <option value="DFC">Deferred Cash Payment</option>
+                        <option value="SC">Spot Cash</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <fieldset>
                 <legend>Payment Details</legend>
                 <div class="form-group">
                     <label>Down Payment (₱)</label>
@@ -168,27 +198,37 @@
 
             <!-- Step 4: Agent Selection -->
             
-            <label for="agent-select">Choose up to 3 agents:</label>
-            <select id="agent-select" name="agents[]" class="form-control" multiple>
-                <?php foreach ($agents as $agent): ?>
-                    <option value="<?= $agent->id ?>"
-                        <?php if (!empty($reservation->agents ?? [])) {
-                            echo in_array($agent->id, $reservation->agents) ? 'selected' : '';
-                        } ?>>
-                        <?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>      
-            <table class="table mt-3" id="selected-agents-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Filled dynamically by JS -->
-                </tbody>
-            </table>      
+            <fieldset>
+                <legend>Agent Selection</legend>
+                
+                <div class="form-group">
+                    <label for="agent-select">Select Agent:</label>
+                    <select id="agent-select" class="form-control">
+                        <option value="">-- Select Agent --</option>
+                        <?php foreach ($agents as $agent): ?>
+                            <option value="<?= $agent->id ?>" data-name="<?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>">
+                                <?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <button type="button" class="btn btn-sm btn-success mb-2" id="add-agent-btn">Add Agent</button>
+
+                <table class="table" id="selected-agents-table">
+                    <thead>
+                        <tr>
+                            <th>Agent Name</th>
+                            <th>Commission %</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rows will be dynamically added -->
+                    </tbody>
+                </table>
+            </fieldset>
+
 
         </div>
 
@@ -301,5 +341,61 @@ document.getElementById('lot_id').addEventListener('change', function () {
         document.getElementById('house_model').value = modelText;
     });
 </script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const agentSelect = document.getElementById('agent-select');
+    const addAgentBtn = document.getElementById('add-agent-btn');
+    const agentTableBody = document.querySelector('#selected-agents-table tbody');
+    const maxAgents = 3;
+
+    addAgentBtn.addEventListener('click', () => {
+        const selectedId = agentSelect.value;
+        const selectedName = agentSelect.selectedOptions[0]?.getAttribute('data-name');
+
+        if (!selectedId) return;
+
+        // Prevent duplicate agents
+        if (document.getElementById(`agent-row-${selectedId}`)) {
+            alert('Agent already added.');
+            return;
+        }
+
+        // Limit to 3 agents
+        if (agentTableBody.children.length >= maxAgents) {
+            alert('You can only add up to 3 agents.');
+            return;
+        }
+
+        const row = document.createElement('tr');
+        row.id = `agent-row-${selectedId}`;
+        row.innerHTML = `
+            <td>
+                <input type="hidden" name="agents[]" value="${selectedId}">
+                ${selectedName}
+            </td>
+            <td>
+                <input type="number" name="agent_commissions[${selectedId}]" class="form-control" step="0.01" min="0" max="100" required>
+            </td>
+            <td>
+                <button type="button" class="btn btn-sm btn-danger remove-agent-btn">Remove</button>
+            </td>
+        `;
+        agentTableBody.appendChild(row);
+
+        // Reset select
+        agentSelect.value = '';
+    });
+
+    // Delegate remove button
+    agentTableBody.addEventListener('click', function (e) {
+        if (e.target.classList.contains('remove-agent-btn')) {
+            e.target.closest('tr').remove();
+        }
+    });
+});
+</script>
+
 
 
