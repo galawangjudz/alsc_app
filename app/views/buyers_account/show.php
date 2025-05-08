@@ -68,31 +68,43 @@
 
     <!-- Payments Tab -->
     <div class="tab-pane fade" id="payments" role="tabpanel">
+
+      <a href="<?= url('payments/create/'. $account->account_no) ?>" class="btn btn-primary mb-3">Add Payment</a>
       <table class="table table-bordered table-sm">
         <thead class="table-light">
           <tr>
-            <th>Date</th>
-            <th>Amount</th>
-            <th>Principal</th>
+            <th>Due Date</th>
+            <th>Pay Date</th>
+            <th>O.R. No.</th>
+            <th>Amount Paid</th>
+            <th>Amount Due</th>
             <th>Interest</th>
+            <th>Principal</th>
             <th>Surcharge</th>
-            <th>Method</th>
+            <th>Rebate</th>
+            <th>Period</th>
+            <th>Balance</th>
           </tr>
         </thead>
         <tbody>
           <?php if (!empty($payments)): ?>
             <?php foreach ($payments as $p): ?>
               <tr>
-                <td><?= htmlspecialchars($p['payment_date']); ?></td>
-                <td>₱<?= number_format($p['amount'], 2); ?></td>
-                <td>₱<?= number_format($p['principal'], 2); ?></td>
-                <td>₱<?= number_format($p['interest'], 2); ?></td>
-                <td>₱<?= number_format($p['surcharge'], 2); ?></td>
-                <td><?= htmlspecialchars($p['method']); ?></td>
+                <td><?= htmlspecialchars($p->due_date); ?></td>
+                <td><?= htmlspecialchars($p->payment_date); ?></td>
+                <td><?= htmlspecialchars($p->or_no); ?></td>
+                <td>₱<?= number_format($p->amount_paid, 2); ?></td>
+                <td>₱<?= number_format($p->amount_due, 2); ?></td>
+                <td>₱<?= number_format($p->interest, 2); ?></td>
+                <td>₱<?= number_format($p->principal, 2); ?></td>
+                <td>₱<?= number_format($p->surcharge, 2); ?></td>
+                <td>₱<?= number_format($p->rebate, 2); ?></td>
+                <td><?= htmlspecialchars($p->status); ?></td>
+                <td><?= htmlspecialchars($p->remaining_balance); ?></td>
               </tr>
             <?php endforeach; ?>
           <?php else: ?>
-            <tr><td colspan="6" class="text-center">No payments recorded.</td></tr>
+            <tr><td colspan="11" class="text-center">No payments recorded.</td></tr>
           <?php endif; ?>
         </tbody>
       </table>

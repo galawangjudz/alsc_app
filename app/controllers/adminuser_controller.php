@@ -3,8 +3,6 @@
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Roles.php';
 
-
-
 class adminuser extends Controller
 {
     public function __construct()
@@ -16,30 +14,32 @@ class adminuser extends Controller
     public function user_list()
     {
         $users = User::all();
-        #echo "<pre>"; print_r($users); exit;
-        return $this->view('admin/users/index', ['users' => $users]);
+        return $this->view('admin/users/index', compact('users'));
     }
+
     public function create()
     {
-      
         $roles = Roles::all();
-        return $this->view('admin/users/create', ['roles' => $roles]);
+        return $this->view('admin/users/create', compact('roles'));
     }
 
     public function store()
     {
         $data = $_POST;
+
         User::insert($data);
-        ActivityLog::log(current_user_id(), 'add', 'Role', 'Added employee ID ' . $data['employee_id']); 
+        ActivityLog::log(current_user_id(), 'add', 'User', 'Added employee ID ' . $data['employee_id']);
 
         return $this->redirect('adminuser/user_list');
     }
+
     public function edit($id)
     {
         $user = User::find($id);
         $roles = Roles::all();
-        return $this->view('admin/users/edit', ['user' => $user, 'roles' => $roles]);
+        return $this->view('admin/users/edit', compact('user', 'roles'));
     }
+
     public function update($id)
     {
         $data = $_POST;
@@ -51,16 +51,13 @@ class adminuser extends Controller
         }
 
         User::update($id, $data);
-        $users = User::all();
-        ActivityLog::log(current_user_id(), 'update', 'Users', 'Updated user id ' . $id);
+        ActivityLog::log(current_user_id(), 'update', 'User', 'Updated user ID ' . $id);
+
         return $this->redirect('adminuser/user_list');
-        #return $this->view('admin/users/index', ['users' => $users]);
-        
     }
+
     public function notfound()
     {
-        $this->view('404_page');
+        return $this->view('404_page');
     }
-
 }
-

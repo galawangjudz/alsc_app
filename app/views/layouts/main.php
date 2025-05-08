@@ -99,6 +99,9 @@
                 <li class="nav-item mb-2">
                     <a href="<?= url('buyersaccount/index') ?>" class="nav-link">Buyers Account</a>
                 </li>
+              <!--   <li class="nav-item mb-2">
+                    <a href="<?= url('payments/create') ?>" class="nav-link">Payments</a>
+                </li> -->
                 <li class="nav-item mb-2">
                     <a href="<?= url('inventory/index') ?>" class="nav-link">Inventory</a>
                 </li>

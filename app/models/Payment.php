@@ -1,9 +1,9 @@
 <?php
 require_once __DIR__ . '/../core/Model.php';
 
-class User extends Model
+class Payment extends Model
 {
-    protected $table = 'users';
+    protected $table = 'payments';
 
     public static function all()
     {
@@ -11,14 +11,6 @@ class User extends Model
         $stmt = $instance->db->prepare("SELECT * FROM {$instance->table}");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_OBJ);
-    }
-
-    public static function count()
-    {
-        $instance = new static();
-        $stmt = $instance->db->prepare("SELECT COUNT(*) AS total FROM {$instance->table} WHERE is_active = 1");
-        $stmt->execute();
-        return $stmt->fetchColumn(); // cleaner for single value
     }
 
     public static function find($id)
@@ -32,14 +24,21 @@ class User extends Model
     public static function insert($data)
     {
         $instance = new static();
-        $sql = "INSERT INTO {$instance->table} (employee_id, name, password, role_id)
-                VALUES (:employee_id, :name, :password, :role_id)";
+        $sql = "INSERT INTO {$instance->table} 
+                (account_no, due_date,payment_date, or_no, amount_paid, amount_due, principal, interest, surcharge, method) 
+                VALUES (:account_no, :due_date, :payment_date, :or_no, :amount_paid, :amount_due, :principal, :interest, :surcharge, :method)";
         $stmt = $instance->db->prepare($sql);
         return $stmt->execute([
-            ':employee_id' => $data['employee_id'],
-            ':name'        => $data['name'],
-            ':password'    => password_hash($data['password'], PASSWORD_DEFAULT),
-            ':role_id'     => $data['role_id']
+            ':account_no'   => $data['account_no'],
+            ':due_date'     => $data['due_date'],
+            ':payment_date' => $data['payment_date'],
+            ':or_no'        => $data['or_no'],
+            ':amount_paid'  => $data['amount_paid'],
+            ':amount_due'   => $data['amount_due'],
+            ':principal'    => $data['principal'],
+            ':interest'     => $data['interest'],
+            ':surcharge'    => $data['surcharge'],
+            ':method'       => $data['method'],
         ]);
     }
 
@@ -65,5 +64,13 @@ class User extends Model
         $instance = new static();
         $stmt = $instance->db->prepare("DELETE FROM {$instance->table} WHERE id = ?");
         return $stmt->execute([$id]);
+    }
+
+    public static function forAccount($account_no)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM {$instance->table} WHERE account_no = ? ORDER BY payment_date DESC");
+        $stmt->execute([$account_no]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 }

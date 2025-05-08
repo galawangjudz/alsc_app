@@ -3,6 +3,7 @@ require_once __DIR__ . '/../models/BuyersAccountModel.php';
 require_once __DIR__ . '/../models/BuyersAccountBuyersModel.php';
 require_once __DIR__ . '/../models/Projects.php';
 require_once __DIR__ . '/../models/Lot.php';
+require_once __DIR__ . '/../models/Payment.php';
 require_once __DIR__ . '/../models/House.php';
 require_once __DIR__ . '/../models/HouseModel.php';
 require_once __DIR__ . '/../models/Agent.php';
@@ -33,7 +34,7 @@ class BuyersAccount extends Controller
         $account = BuyersAccountModel::find($account_no);
         $co_buyers = BuyersAccountBuyersModel::co_buyers($account_no);
         $commissions = AgentCommissionModel::findByAccount($account_no);
-       
+        $payments = Payment::forAccount($account_no);
 
         if (!$account) {
             // Handle the case when account is not found
@@ -41,7 +42,7 @@ class BuyersAccount extends Controller
         }
 
         // Pass account details and commissions to the view
-        return $this->view('buyers_account/show', compact('account','co_buyers', 'commissions'));
+        return $this->view('buyers_account/show', compact('account','co_buyers', 'commissions', 'payments'));
     }
 
     // Show the form for creating a new buyer account
