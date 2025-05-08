@@ -14,7 +14,7 @@
     </div>
 
     <div class="mb-3">
-      <label for="or_no" class="form-label">OR Date</label>
+      <label for="or_no" class="form-label">SI/OR No.</label>
       <input type="text" class="form-control" name="or_no" required>
     </div>
 

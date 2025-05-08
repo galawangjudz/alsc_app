@@ -216,7 +216,7 @@
                     <select id="agent-select" class="form-control">
                         <option value="">-- Select Agent --</option>
                         <?php foreach ($agents as $agent): ?>
-                            <option value="<?= $agent->id ?>" data-name="<?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>">
+                            <option value="<?= $agent->c_code ?>" data-name="<?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>">
                                 <?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>
                             </option>
                         <?php endforeach; ?>
@@ -229,7 +229,8 @@
                     <thead>
                         <tr>
                             <th>Agent Name</th>
-                            <th>Commission %</th>
+                            <th>Commission Rate %</th>
+                            <th>Commission Amount</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -386,7 +387,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 ${selectedName}
             </td>
             <td>
-                <input type="number" name="agent_commissions[${selectedId}]" class="form-control" step="0.01" min="0" max="100" required>
+                <input type="number" name="agent_commission_rate[${selectedId}]" class="form-control" step="0.01" min="0" required>
+            </td>
+            <td>
+                <input type="number" name="agent_commission_amount[${selectedId}]" class="form-control" step="0.01" min="0"  required>
             </td>
             <td>
                 <button type="button" class="btn btn-sm btn-danger remove-agent-btn">Remove</button>

@@ -103,12 +103,14 @@ class BuyersAccount extends Controller
         }
 
         // 3. Save Agent Commissions (assumes data is sent as arrays: agent_ids[], commissions[])
-        if (isset($_POST['agent_ids']) && is_array($_POST['agent_ids'])) {
-            foreach ($_POST['agent_ids'] as $index => $agentId) {
+        //echo "<pre>"; print_r($_POST); exit;
+        if (isset($_POST['agents']) && is_array($_POST['agents'])) {
+            foreach ($_POST['agents'] as $agentId) {
                 AgentCommissionModel::create([
                     'buyers_account_no' => $account_no,
                     'agent_id' => $agentId,
-                    'commission_percent' => $_POST['commission_percents'][$index] ?? 0,
+                    'commission_amount' => $_POST['agent_commission_amount'][$agentId] ?? 0,
+                    'rate' => $_POST['agent_commission_rate'][$agentId] ?? 0,
                 ]);
             }
         }
@@ -116,9 +118,9 @@ class BuyersAccount extends Controller
         $lotstatus = [
             'status' => 'Sold'
         ];
-        Lot::where($_POST['lot_id'],$lotstatus);
+        Lot::update($_POST['lot_id'], $lotstatus);
 
-        return $this->redirect('buyers_account/index');
+        return $this->redirect('buyersaccount/index');
     }
 
 

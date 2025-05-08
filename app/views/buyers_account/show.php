@@ -112,10 +112,26 @@
 
     <!-- Commissions Tab -->
     <div class="tab-pane fade" id="commissions" role="tabpanel">
-      <?php if (isset($agent) && isset($commission)): ?>
-        <h5>Agent Details</h5>
-        <p><strong>Name:</strong> <?= htmlspecialchars($agent->agent_name ?? ''); ?></p>
-        <p><strong>Commission:</strong> ₱<?= number_format($commission->commission_amount ?? 0, 2); ?></p>
+      <?php if (!empty($commissions)): ?>
+        <h5>Agent Commissions</h5>
+        <table class="table table-bordered table-sm">
+          <thead class="table-light">
+            <tr>
+              <th>Agent Name</th>
+              <th>Rate (%)</th>
+              <th>Commission Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($commissions as $c): ?>
+              <tr>
+                <td><?= htmlspecialchars($c->agent_name ?? ''); ?></td>
+                <td><?= number_format($c->rate ?? 0, 2); ?>%</td>
+                <td>₱<?= number_format($c->commission_amount ?? 0, 2); ?></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
       <?php else: ?>
         <p>No commission data available.</p>
       <?php endif; ?>

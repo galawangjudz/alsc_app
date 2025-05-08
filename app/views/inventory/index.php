@@ -12,6 +12,7 @@
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
+            <th>Lot ID#</th>
             <th>Site</th>
             <th>Block</th>
             <th>Lot</th>
@@ -32,6 +33,7 @@
             ?>
             <?php foreach ($inventory as $item): ?>
                 <tr>
+                    <td><?= $item->id ?></td>
                     <td><?= $projectAcronyms[$item->site_id] ?? $item->site_id ?></td>
                     <td><?= $item->block ?></td>
                     <td><?= $item->lot ?></td>
@@ -46,7 +48,7 @@
                 </tr>
             <?php endforeach; ?>
         <?php else: ?>
-            <tr><td colspan="7">No inventory records found.</td></tr>
+            <tr><td colspan="8">No inventory records found.</td></tr>
         <?php endif; ?>
     </tbody>
 </table>

@@ -17,25 +17,23 @@ class AgentCommissionModel extends Model
     public static function findByAccount($account_no)
     {
         $instance = new static();
-        // SQL query to join buyers_account and agent_commissions
         $stmt = $instance->db->prepare("
             SELECT 
                 ac.*, 
                 ba.account_no, 
                 ba.date_of_sale, 
-                b.last_name + ' ' + b.first_name AS buyer_name, 
-                ag.c_last_name + ' ' + ag.c_first_name AS agent_name
+                CONCAT(b.last_name, ' ', b.first_name) AS buyer_name,
+                CONCAT(ag.c_last_name, ' ', ag.c_first_name) AS agent_name
             FROM 
                 agent_commissions ac
             LEFT JOIN buyers_account ba ON ac.account_no = ba.account_no 
             LEFT JOIN buyers_account_buyer b ON ba.account_no = b.account_no AND b.is_primary = TRUE
-            LEFT JOIN t_agents ag ON ac.agent_id = ag.id
+            LEFT JOIN t_agents ag ON ac.agent_id = ag.c_code
             WHERE ac.account_no = ?
         ");
 
         $stmt->execute([$account_no]);
-        // Return the result as an object
-        return $stmt->fetch(PDO::FETCH_OBJ);
+        return $stmt->fetchAll(PDO::FETCH_OBJ); // Fetch multiple rows
     }
 
     // Create a new commission entry
@@ -44,17 +42,19 @@ class AgentCommissionModel extends Model
         $instance = new static();
     
         $stmt = $instance->db->prepare("
-            INSERT INTO agent_commission (
-                buyers_account_id,
+            INSERT INTO agent_commissions (
+                account_no,
                 agent_id,
-                commission_percent
-            ) VALUES (?, ?, ?)
+                commission_amount,
+                rate
+            ) VALUES (?, ?, ?,?)
         ");
     
         return $stmt->execute([
             $data['buyers_account_no'],
             $data['agent_id'],
-            $data['commission_percent']
+            $data['commission_amount'],
+            $data['rate']
         ]);
     }
     
