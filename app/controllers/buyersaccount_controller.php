@@ -31,7 +31,9 @@ class BuyersAccount extends Controller
     {
         // Fetch the buyer account with related buyer, lot, and agent commission
         $account = BuyersAccountModel::find($account_no);
+        $co_buyers = BuyersAccountBuyersModel::co_buyers($account_no);
         $commissions = AgentCommissionModel::findByAccount($account_no);
+       
 
         if (!$account) {
             // Handle the case when account is not found
@@ -39,7 +41,7 @@ class BuyersAccount extends Controller
         }
 
         // Pass account details and commissions to the view
-        return $this->view('buyers_account/show', compact('account', 'commissions'));
+        return $this->view('buyers_account/show', compact('account','co_buyers', 'commissions'));
     }
 
     // Show the form for creating a new buyer account
@@ -86,13 +88,14 @@ class BuyersAccount extends Controller
         $account_no = BuyersAccountModel::create($accountData);
         
         if (isset($_POST['buyers']) && is_array($_POST['buyers'])) {
-            foreach ($_POST['buyers'] as $buyer) {
+            foreach ($_POST['buyers'] as $index => $buyer) {
                 if (!empty($buyer['first_name']) && !empty($buyer['last_name'])) {
                     BuyersAccountBuyersModel::create([
-                        'buyers_account_no' => $account_no, // This MUST be the primary key value
+                        'buyers_account_no' => $account_no,
                         'last_name'         => $buyer['last_name'] ?? '',
                         'first_name'        => $buyer['first_name'] ?? '',
                         'contact_no'        => $buyer['contact_no'] ?? '',
+                        'is_primary'        => $index === 0 ? 1 : 0, // Mark first buyer as primary
                     ]);
                 }
             }

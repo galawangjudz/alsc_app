@@ -12,16 +12,16 @@ class BuyersAccountModel extends Model
         $stmt = $instance->db->query("
         SELECT 
             ba.*, 
-            b.last_name + ' ' + b.first_name AS buyer_name,
+            b.*,
+            p.c_acronym AS project_acronym,
             l.site_id, 
             l.block, 
-            l.lot, 
-            ag.c_last_name + ' ' + ag.c_first_name AS agent_name
+            l.lot
         FROM 
             buyers_account ba
         LEFT JOIN buyers_account_buyer b ON ba.account_no = b.account_no AND b.is_primary = TRUE
         LEFT JOIN lots l ON ba.lot_id = l.id
-        LEFT JOIN t_agents ag ON ba.agent_id = ag.id;");
+        LEFT JOIN t_projects p ON l.site_id = p.c_code");
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
@@ -31,19 +31,33 @@ class BuyersAccountModel extends Model
         $instance = new static();
         // SQL query to join the buyers_account, buyer, lot, and agent tables
         $stmt = $instance->db->prepare("
-             SELECT 
+            SELECT 
                 ba.*, 
-                b.last_name + ' ' + b.first_name AS buyer_name,
+                b.*,
                 l.site_id, 
+                p.c_acronym AS project_acronym,  -- The converted site_id
                 l.block, 
-                l.lot, 
-                ag.c_last_name + ' ' + ag.c_first_name AS agent_name
+                l.lot,
+                h.model,        
+                f.fence_type,         
+                a.cost      
             FROM 
                 buyers_account ba
-            LEFT JOIN buyers_account_buyer b ON ba.account_no = b.account_no AND b.is_primary = TRUE
-            LEFT JOIN lots l ON ba.lot_id = l.id
-            LEFT JOIN t_agents ag ON ba.agent_id = ag.id;
-            WHERE ba.account_no = ?
+            LEFT JOIN buyers_account_buyer b 
+                ON ba.account_no = b.account_no AND b.is_primary = TRUE
+            LEFT JOIN lots l 
+                ON ba.lot_id = l.id
+            LEFT JOIN houses h 
+                ON l.id = h.lot_id
+            LEFT JOIN fences f 
+                ON l.id = f.lot_id
+            LEFT JOIN additional_costs a
+                ON l.id = a.lot_id
+            LEFT JOIN t_projects p 
+                ON l.site_id = p.c_code
+            WHERE 
+                ba.account_no = ?
+
         ");
         
         $stmt->execute([$account_no]);
@@ -59,7 +73,7 @@ class BuyersAccountModel extends Model
         $stmt = $instance->db->prepare("
             INSERT INTO buyers_account (
                 lot_id,
-                account_type_primary,
+                account_type,
                 house_model,
                 house_price_per_sqm,
                 lot_area,

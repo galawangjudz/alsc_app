@@ -14,11 +14,6 @@ class User extends Model
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-        // Debug:
-        //echo "<pre>"; print_r($results);
-        //exit;
-
-
         return $results;
     }
     public static function count()

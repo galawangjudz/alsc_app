@@ -22,11 +22,11 @@
                         <label for="acc_type">Account Type:</label>
                         <select id="acc_type" name="acc_type" class="form-control" required>
                             <option value="">-- Select Type --</option>
-                            <option value="lot_only">Lot Only</option>
-                            <option value="packaged">Packaged</option>
-                            <option value="house_only">House Only</option>
-                            <option value="fence_only">Fence Only</option>
-                            <option value="add_cost">Add Cost</option>
+                            <option value="Lot Only">Lot Only</option>
+                            <option value="Packaged">Packaged</option>
+                            <option value="House Only">House Only</option>
+                            <option value="Fence">Fence Only</option>
+                            <option value="Add Cost">Add Cost</option>
                         </select>
                     </div>
                 </fieldset>
@@ -408,42 +408,76 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const addBtn = document.getElementById('add-buyer-btn');
-    const container = document.getElementById('buyers-container');
+    let buyerIndex = 1;  // Start with the second buyer
+    
+    document.getElementById('add-buyer-btn').addEventListener('click', function() {
+        // Create new buyer group
+        const newBuyerGroup = document.createElement('div');
+        newBuyerGroup.classList.add('buyer-group', 'mb-3');
+        newBuyerGroup.setAttribute('data-buyer-index', buyerIndex);
 
-    addBtn.addEventListener('click', () => {
-        const buyerGroups = container.querySelectorAll('.buyer-group');
-        const newIndex = buyerGroups.length;
-
-        const newBuyer = document.createElement('div');
-        newBuyer.classList.add('buyer-group', 'mb-3');
-        newBuyer.innerHTML = `
-            <h5>Buyer ${newIndex + 1}</h5>
+        newBuyerGroup.innerHTML = `
+            <h5>Buyer ${buyerIndex + 1}</h5>
             <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" name="buyers[${newIndex}][full_name]" class="form-control" required>
+                <label>First Name</label>
+                <input type="text" name="buyers[${buyerIndex}][first_name]" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" name="buyers[${buyerIndex}][last_name]" class="form-control" required>
             </div>
             <div class="form-group">
                 <label>Contact</label>
-                <input type="text" name="buyers[${newIndex}][contact]" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Address</label>
-                <textarea name="buyers[${newIndex}][address]" class="form-control" required></textarea>
+                <textarea name="buyers[${buyerIndex}][contact_no]" class="form-control" required></textarea>
             </div>
             <button type="button" class="btn btn-sm btn-danger remove-buyer-btn mt-2">Remove</button>
             <hr>
         `;
-        container.appendChild(newBuyer);
+
+        // Append the new buyer group to the container
+        document.getElementById('buyers-container').appendChild(newBuyerGroup);
+
+        // Show the "remove" button for all buyers after the first
+        const removeButtons = document.querySelectorAll('.remove-buyer-btn');
+        removeButtons.forEach((btn, index) => {
+            btn.classList.remove('d-none');
+            // Disable remove button for the first buyer to prevent deleting all
+            if (index === 0) {
+                btn.classList.add('d-none');
+            }
+        });
+
+        buyerIndex++; // Increment buyer index for the next buyer
     });
 
-    container.addEventListener('click', function (e) {
-        if (e.target.classList.contains('remove-buyer-btn')) {
-            e.target.closest('.buyer-group').remove();
+    // Remove buyer event handler
+    document.getElementById('buyers-container').addEventListener('click', function(event) {
+        if (event.target && event.target.classList.contains('remove-buyer-btn')) {
+            const buyerGroup = event.target.closest('.buyer-group');
+            if (buyerGroup) {
+                buyerGroup.remove();
+                // Reorder the buyer indices
+                const buyerGroups = document.querySelectorAll('.buyer-group');
+                buyerGroups.forEach((group, index) => {
+                    const newIndex = index;
+                    group.setAttribute('data-buyer-index', newIndex);
+                    const inputFields = group.querySelectorAll('input, textarea');
+                    inputFields.forEach(field => {
+                        field.name = field.name.replace(/\[\d+\]/, `[${newIndex}]`);
+                    });
+                });
+
+                // Update the remove buttons (hide/remove the button for the first buyer)
+                const removeButtons = document.querySelectorAll('.remove-buyer-btn');
+                removeButtons.forEach((btn, index) => {
+                    if (index === 0) {
+                        btn.classList.add('d-none');
+                    } else {
+                        btn.classList.remove('d-none');
+                    }
+                });
+            }
         }
     });
-});
 </script>
-
 

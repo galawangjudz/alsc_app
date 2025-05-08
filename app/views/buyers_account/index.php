@@ -6,7 +6,9 @@
         <thead>
             <tr>
                 <th>Account No</th>
-                <th>Buyer Name</th>
+                <th>Location</th>
+                <th>Last Name</th>
+                <th>First Name</th>
                 <th>Status</th>
                 <th>Action</th>
             </tr>
@@ -15,11 +17,13 @@
             <?php foreach ($accounts as $account): ?>
                 <tr>
                     <td><?= htmlspecialchars($account->account_no); ?></td>
-                    <td><?= htmlspecialchars($account->buyer_name); ?></td>
+                    <td><?= htmlspecialchars($account->project_acronym); ?> <?= htmlspecialchars($account->block); ?> <?= htmlspecialchars($account->lot); ?></td>
+                    <td><?= htmlspecialchars($account->last_name); ?></td>
+                    <td><?= htmlspecialchars($account->first_name); ?></td>
                     <td><?= htmlspecialchars($account->account_status); ?></td>
                     <td>
                         <a href="<?= url('buyersaccount/show/'. $account->account_no)?>" class="btn btn-info">View</a>
-                        <a href="<?= url('buyersaccount/edit/'. $account->account_no)?>" class="btn btn-warning">Edit</a>
+                        <a href="<?= url('buyersaccount/update/'. $account->account_no)?>" class="btn btn-warning">Edit</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

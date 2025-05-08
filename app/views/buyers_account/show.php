@@ -1,5 +1,5 @@
 <div class="container mt-4">
-  <h2>Buyer Account: <strong><?= htmlspecialchars($account->account_no); ?></strong></h2>
+  <h2>Account No: <strong><?= htmlspecialchars($account->account_no); ?></strong></h2>
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" id="buyerAccountTabs" role="tablist">
@@ -19,17 +19,51 @@
     <!-- Overview Tab -->
     <div class="tab-pane fade show active" id="overview" role="tabpanel">
       <div class="row">
+        <!-- Primary Buyer -->
         <div class="col-md-6">
-          <h5>Buyer Info</h5>
-          <p><strong>Name:</strong> <?= htmlspecialchars($buyer->full_name ?? 'N/A'); ?></p>
-          <p><strong>Contact:</strong> <?= htmlspecialchars($buyer->contact_number ?? 'N/A'); ?></p>
+          <h5>Primary Buyer</h5>
+          <p><strong>Name:</strong> <?= htmlspecialchars($account->last_name  ?? 'N/A'); ?>, <?= htmlspecialchars($account->first_name  ?? 'N/A'); ?></p>
+          <p><strong>Contact:</strong> <?= htmlspecialchars($account->contact_no ?? 'N/A'); ?></p>
         </div>
+
+        <!-- Lot Info -->
         <div class="col-md-6">
           <h5>Lot Info</h5>
-          <p><strong>Lot:</strong> <?= htmlspecialchars($lot->lot ?? ''); ?></p>
-          <p><strong>Block:</strong> <?= htmlspecialchars($lot->block ?? ''); ?> | Phase: <?= htmlspecialchars($lot->phase ?? ''); ?></p>
+          <p><strong>Phase:</strong> <?= htmlspecialchars($account->project_acronym ?? ''); ?></p>
+          <p><strong>Block:</strong> <?= htmlspecialchars($account->block ?? ''); ?> </p>
+          <p><strong>Lot:</strong> <?= htmlspecialchars($account->lot ?? ''); ?></p>
+          <p><strong>House Model:</strong> <?= htmlspecialchars($account->model ?? ''); ?></p>
+          <p><strong>Fence Type:</strong> <?= htmlspecialchars($account->fence_type ?? ''); ?></p>
         </div>
       </div>
+
+      <!-- Payment Terms -->
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <h5>Payment Terms</h5>
+          <p><strong>Term:</strong> <?= htmlspecialchars($account->term_years ?? ''); ?> years</p>
+          <p><strong>Monthly Amortization:</strong> ₱<?= number_format($account->monthly_amortization ?? 0, 2); ?></p>
+        </div>
+        <div class="col-md-6">
+          <h5>Net Total Contract Price (NTCP)</h5>
+          <p><strong>Amount:</strong> ₱<?= number_format($account->total_contract_price ?? 0, 2); ?></p>
+        </div>
+      </div>
+
+      <!-- Co-Buyers -->
+      <?php if (!empty($co_buyers)): ?>
+        <div class="mt-4">
+          <h5>Co-Buyers</h5>
+          <ul class="list-group">
+            <?php foreach ($co_buyers as $buyer): ?>
+              <li class="list-group-item">
+                <?= htmlspecialchars($buyer['last_name']) ?>, <?= htmlspecialchars($buyer['first_name']) ?>
+                <small class="text-muted"> | Contact: <?= htmlspecialchars($buyer['contact_no']) ?></small>
+              </li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
+      <?php endif; ?>
     </div>
 
     <!-- Payments Tab -->
