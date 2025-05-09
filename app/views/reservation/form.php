@@ -5,10 +5,10 @@
         $projectAcronyms[$project->c_code] = $project->c_acronym;
 
     } 
-    $agentsMap = [];
+   /*  $agentsMap = [];
     foreach ($agents as $a) {
         $agentsMap[$a->id] = $a;
-    }
+    } */
    ?>
 
 
@@ -302,7 +302,7 @@
                 <label for="agent-select">Select Agent:</label>
                 <select id="agent-select" class="form-control">
                     <option value="">-- Select Agent --</option>
-                    <?php foreach ($all_agents as $agent): ?>
+                    <?php foreach ($agent_all as $agent): ?>
                         <option value="<?= $agent->c_code ?>" data-name="<?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>">
                             <?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>
                         </option>
@@ -323,21 +323,21 @@
                 </thead>
                 <tbody>
                 <?php if (!empty($agents)): ?>
-                    <?php foreach ($agents as $agent): ?>
-                        <tr id="agent-row-<?= $agent->agent_id ?>" class="agent-row">
+                    <?php foreach ($agents as $ag): ?>
+                        <tr id="agent-row-<?= $ag->agent_id ?>" class="agent-row">
                             <td>
-                                <input type="hidden" name="agents[]" value="<?= htmlspecialchars($agent->agent_id) ?>">
-                                <?= htmlspecialchars($agent->agent_name) ?>
+                                <input type="hidden" name="agents[]" value="<?= htmlspecialchars($ag->agent_id) ?>">
+                                <?= htmlspecialchars($ag->agent_name) ?>
                             </td>
                             <td>
-                                <input type="number" name="agent_commission_rate[<?= $agent->agent_id ?>]" 
+                                <input type="number" name="agent_commission_rate[<?= $ag->agent_id ?>]" 
                                     class="form-control" step="0.01" min="0" required 
-                                    value="<?= htmlspecialchars($agent->rate) ?>">
+                                    value="<?= htmlspecialchars($ag->rate) ?>">
                             </td>
                             <td>
-                                <input type="number" name="agent_commission_amount[<?= $agent->agent_id ?>]" 
+                                <input type="number" name="agent_commission_amount[<?= $ag->agent_id ?>]" 
                                     class="form-control" step="0.01" min="0" required 
-                                    value="<?= htmlspecialchars($agent->commission_amount) ?>">
+                                    value="<?= htmlspecialchars($ag->commission_amount) ?>">
                             </td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-danger remove-agent-btn">Remove</button>
@@ -354,7 +354,11 @@
 
         <!-- Submit Button -->
         <div class="mt-4 text-center">
-            <button type="submit" class="btn btn-primary">Save Reservation</button>
+             <?php if (!empty($reservation->id)): ?>
+                <button type="submit" class="btn btn-primary">Update</button>
+            <?php else: ?>
+                <button type="submit" class="btn btn-primary">Save</button>
+            <?php endif; ?>
         </div>
     </form>
 

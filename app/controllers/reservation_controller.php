@@ -37,14 +37,14 @@ class Reservation extends Controller
     public function create()
     {
         // Fetch required data for creating an account (like agents, lots, buyers)
-        $agents = Agent::all(); // Assuming you have an agent model
+        $agent_all = Agent::all(); // Assuming you have an agent model
         $houses = House::all();
         $house_models = HouseModel::all();
         $projects = Projects::all(); 
         $lots = Lot::all_available(); // Assuming you have a lot model
         
 
-        return $this->view('reservation/create', compact('projects','houses','house_models','agents', 'lots'));
+        return $this->view('reservation/create', compact('projects','houses','house_models','agent_all', 'lots'));
     }
 
     // Handle the form submission for creating a new buyer account
@@ -167,7 +167,8 @@ class Reservation extends Controller
         $reservation = Reservations::find($id);
 
         if ($reservation->status !== 'draft') {
-            return $this->view('error', ['message' => 'Editing is allowed only in draft.']);
+            $_SESSION['error'] = 'Editing is allowed only in draft status.';
+            return $this->redirect('reservation/index');
         }
 
         $buyers = Reservations::find_buyers($id);
@@ -176,9 +177,9 @@ class Reservation extends Controller
         $lots = Lot::all_available();
         $houses = House::all();
         $house_models = HouseModel::all();
-        $all_agents = Agent::all();
+        $agent_all = Agent::all();
         //echo "<pre>";print_r($agents); exit;
-        return $this->view('reservation/edit', compact('reservation','buyers','agents', 'projects', 'lots', 'houses', 'house_models', 'all_agents'));
+        return $this->view('reservation/edit', compact('reservation','buyers','agents', 'projects', 'lots', 'houses', 'house_models', 'agent_all'));
     }
 
     public function update()
@@ -276,10 +277,24 @@ class Reservation extends Controller
             }
         }
 
-        ApprovalLog::log($id, 'agent', 'edited', current_user_id(), current_user_role());
+        ApprovalLog::log($id, 'agent', 'draft', current_user_id(), current_user_role());
         ActivityLog::log(current_user_id(), 'update', 'Reservation', "Draft updated for {$id}");
 
         return $this->redirect("reservation/index");
+    }
+
+    public function SubmitToSale($id)
+    {
+        $reservation = Reservations::index($id);
+        //echo "<pre>"; print_r($reservation); exit;
+        $reservation->status = 'submitted';
+        $reservation->current_step = 'sales';
+        $reservation->save();
+
+        ApprovalLog::log($id, 'agent', 'submitted', current_user_id(), 'Submitted by agent');
+        ActivityLog::log(current_user_id(), 'submitted', 'Reservation', 'Submitted reservation ID ' . $id);
+        header('Location: ' . url('reservation/show/' . $id));
+        exit;
     }
 
 
@@ -292,7 +307,7 @@ class Reservation extends Controller
 
         ApprovalLog::log($id, 'sales', 'validated', current_user_id(), 'Validated by sales');
         ActivityLog::log(current_user_id(), 'update', 'Reservation', 'Validated reservation ID ' . $id);
-        return $this->redirect('reservation/view/' . $id);
+        return $this->redirect('reservation/show/' . $id);
     }
 
     public function void($id)

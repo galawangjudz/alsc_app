@@ -174,7 +174,11 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="mt-4">
+    <div class="mt-4 d-flex justify-content-center gap-3">
         <a href="<?= url('reservation/edit/' . $reservation->id) ?>" class="btn btn-primary">Edit</a>
+        <a href="<?= url('reservation/delete/' . $reservation->id) ?>" class="btn btn-danger">Delete</a>
+        <a href="<?= url('reservation/SubmitToSale/' . $reservation->id) ?>" class="btn btn-success">Submit</a>
     </div>
+
+
 </div>

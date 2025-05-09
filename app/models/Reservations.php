@@ -5,6 +5,24 @@ class Reservations extends Model
 {
     protected $table = 'buyers_account_draft';
 
+
+    public static function index($id)
+    {
+        $instance = new static();
+        
+        // Prepare the statement with placeholders
+        $stmt = $instance->db->prepare(" 
+            SELECT * 
+            FROM buyers_account_draft 
+            WHERE id = ?");
+        
+        // Execute the statement with the bound parameter
+        $stmt->execute([$id]);
+        
+        // Return the fetched result as an associative array
+        return $stmt->fetchObject(static::class);
+    } 
+
     public static function all()
     {
         $instance = new static();
@@ -78,7 +96,11 @@ class Reservations extends Model
          $stmt->execute([$id]);
 
          return $stmt->fetch(PDO::FETCH_OBJ);
+
     }
+
+
+   
 
 
     public static function find_agents($id)
