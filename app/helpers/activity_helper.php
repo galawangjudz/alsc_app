@@ -19,3 +19,7 @@ function is_admin() {
 function current_user_id() {
     return $_SESSION['user']['employee_id'] ?? null;
 }
+
+function current_user_role() {
+    return $_SESSION['user']['role_id'] ?? null;
+}

@@ -17,47 +17,133 @@ class Reservation extends Controller
     public function index()
     {
         $reservations = Reservations::all();
+        $approval_logs = Reservations::app_log();
+
+        // Group logs by reservation ID
+        $logs_by_reservation = [];
+        foreach ($approval_logs as $log) {
+            $logs_by_reservation[$log->id][] = $log;
+        }
+
+        // Attach logs to each reservation object
+        foreach ($reservations as $res) {
+            $res->approval_logs = $logs_by_reservation[$res->id] ?? [];
+        }
         return $this->view('reservation/index', ['reservations' => $reservations]);
     }
 
+    
+
     public function create()
     {
-        $projects = Projects::all();
-        $lots = Lot::all_available();
+        // Fetch required data for creating an account (like agents, lots, buyers)
+        $agents = Agent::all(); // Assuming you have an agent model
         $houses = House::all();
         $house_models = HouseModel::all();
-        $agents = Agent::all();
-        return $this->view('reservation/create', compact('projects', 'lots', 'houses', 'house_models', 'agents'));
+        $projects = Projects::all(); 
+        $lots = Lot::all_available(); // Assuming you have a lot model
+        
+
+        return $this->view('reservation/create', compact('projects','houses','house_models','agents', 'lots'));
     }
 
+    // Handle the form submission for creating a new buyer account
     public function store()
     {
-        $data = $_POST;
+        // 1. Create the main buyers account record
+        //echo "<pre>"; print_r($_POST); exit;
+        $accountData = [
+            'reservation_no' => $_POST['reservation_no'] ?? null,
+            'account_no' => $_POST['account_no'] ?? null,
+            'lot_id' => $_POST['lot_id'] ?? null,
+            'date_of_sale' => $_POST['date_of_sale'] ?? date('Y-m-d'),
+        
+            'account_type' => $_POST['acc_type'],
+            'account_type_secondary' => $_POST['acc_type_secondary'] ?? null,
+        
+            'lot_area' => $_POST['lot_area'] ?? null,
+            'lot_price_per_sqm' => $_POST['lot_price_per_sqm'] ?? 0,
+            'lot_discount_percent' => $_POST['lot_discount_percent'] ?? 0,
+            'lot_discount_amount' => $_POST['lot_discount'] ?? 0,
+        
+            'house_model' => $_POST['house_model'] ?? null,
+            'floor_area' => $_POST['floor_area'] ?? null,
+            'house_price_per_sqm' => $_POST['house_price'] ?? 0,
+            'house_discount_percent' => $_POST['house_discount_percent'] ?? 0,
+            'house_discount_amount' => $_POST['house_discount'] ?? 0,
+        
+            'tcp_discount_percent' => $_POST['tcp_discount_percent'] ?? 0,
+            'tcp_discount_amount' => $_POST['tcp_discount_amount'] ?? 0,
+        
+            'total_contract_price' => $_POST['lcp'] ?? null,
+            'vat_amount' => $_POST['vat_amount'] ?? 0,
+            'net_total_contract_price' => $_POST['net_lcp'] ?? $_POST['lcp'], // fallback
+        
+            'reservation_fee' => $_POST['reservation_fee'] ?? 0,
+        
+            'payment_type_primary' => $_POST['payment_type_primary'],
+            'payment_type_secondary' => $_POST['payment_type_secondary'] ?? null,
+        
+            'down_payment_percent' => $_POST['down_payment_percent'] ?? 0,
+            'net_down_payment' => $_POST['net_down_payment']?? 0,
+        
+            'number_of_payments' => $_POST['number_of_payments'] ?? null,
+            'monthly_down_payment' => $_POST['monthly_down_payment'] ?? null,
+            'first_down_payment_date' => $_POST['first_down_payment_date'] ?? null,
+            'full_down_payment_due_date' => $_POST['full_down_payment_due_date'] ?? null,
+        
+            'amount_financed' => $_POST['amount_financed'] ?? 0,
+            'financing_terms_months' => $_POST['term_months'],
+            'interest_rate' => $_POST['interest_rate'] ?? 0,
+            'fixed_factor' => $_POST['fixed_factor'] ?? 0,
+            'monthly_amortization' => $_POST['monthly_amortization'] ?? 0,
+            'amortization_start_date' => $_POST['amortization_start_date'] ?? null,
+        
+            'fence_cost' => $_POST['fence_cost'] ?? 0,
+            'add_cost' => $_POST['add_cost'] ?? 0,        
+        
+            #'account_status' => 'Reservation', pag booked sale na
+            'is_voided' => 0,
+            'voided_by' => null,
+            'void_reason' => null,
+        ];
+        $reservation = Reservations::create($accountData);
 
-        // Create the reservation draft
-        $reservation = Reservations::create($data);
-
-        // Attach buyers
-        foreach ($data['buyers'] as $index => $buyer_id) {
-            $is_primary = ($index === 0);
-            $reservation->attachBuyer($buyer_id, $is_primary);
+        if (isset($_POST['buyers']) && is_array($_POST['buyers'])) {
+            foreach ($_POST['buyers'] as $index => $buyer) {
+                if (!empty($buyer['first_name']) && !empty($buyer['last_name'])) {
+                    Reservations::create_buyer([
+                        'buyers_account_draft_id' => $reservation,
+                        'last_name'         => $buyer['last_name'] ?? '',
+                        'first_name'        => $buyer['first_name'] ?? '',
+                        'contact_no'        => $buyer['contact_no'] ?? '',
+                        'is_primary'        => $index === 0 ? 1 : 0, // Mark first buyer as primary
+                    ]);
+                }
+            }
         }
 
-        // Attach agents with commission
-        foreach ($data['agents'] as $agent_data) {
-            $reservation->attachAgent(
-                $agent_data['agent_id'],
-                $agent_data['commission_percent'],
-                $agent_data['commission_amount']
-            );
+        // 3. Save Agent Commissions (assumes data is sent as arrays: agent_ids[], commissions[])
+        //echo "<pre>"; print_r($_POST); exit;
+        if (isset($_POST['agents']) && is_array($_POST['agents'])) {
+            foreach ($_POST['agents'] as $agentId) {
+                Reservations::create_rsv_commission([
+                    'buyers_account_draft_id' => $reservation,
+                    'agent_id' => $agentId,
+                    'commission_amount' => $_POST['agent_commission_amount'][$agentId] ?? 0,
+                    'rate' => $_POST['agent_commission_rate'][$agentId] ?? 0,
+                ]);
+            }
         }
 
-        // Log draft creation
-        ApprovalLog::log($reservation->id, 'agent', 'draft', current_user_id());
+    
+        ApprovalLog::log($reservation, 'agent', 'draft', current_user_id(),current_user_role());
 
-        ActivityLog::log(current_user_id(), 'add', 'Reservation', "Draft created for {$data['account_no']}");
-        return $this->redirect("reservation/view/{$reservation->id}");
+        ActivityLog::log(current_user_id(), 'add', 'Reservation', "Draft created for {$reservation}");
+        return $this->redirect("reservation/index");
+
     }
+
 
     public function edit($id)
     {

@@ -1,42 +1,43 @@
-<h2>Reservations</h2>
+<h2>Reservation Approval Monitor</h2>
 
-<a href="<?= url('reservation/create') ?>" class="btn btn-primary mb-3">+ New Reservation</a>
-
+<a href="<?= url('reservation/create') ?>" class="btn btn-primary">Create New Account</a>
 <table class="table table-bordered table-striped">
-    <thead class="thead-dark">
-        <tr>
-            <th>ID</th>
-            <th>Buyer</th>
-            <th>Lot</th>
-            <th>Down Payment</th>
-            <th>Term</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (count($reservations) > 0): ?>
-            <?php foreach ($reservations as $res): ?>
-                <tr>
-                    <td><?= $res->id ?></td>
-                    <td><?= $res->buyer1_name ?><?= $res->buyer2_name ? ' & ' . $res->buyer2_name : '' ?></td>
-                    <td>
-                        Lot <?= $res->lot()->number ?? '' ?> - <?= $res->lot()->location ?? '' ?>
-                    </td>
-                    <td>₱<?= number_format($res->down_payment, 2) ?></td>
-                    <td><?= $res->term_months ?> months</td>
-                    <td><span class="badge bg-<?= getStatusColor($res->status) ?>"><?= ucfirst($res->status) ?></span></td>
-                    <td>
-                        <a href="<?= url('reservation/view/'. $res->id )?>" class="btn btn-sm btn-info">View</a>
-                        <a href="<?= url('reservation/edit/'. $res->id )?>" class="btn btn-sm btn-warning">Edit</a>
-                        <a href="<?= url('reservation/delete/'. $res->id ) ?>" onclick="return confirm('Delete this reservation?')" class="btn btn-sm btn-danger">Delete</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <tr>
-                <td colspan="7" class="text-center">No reservations found.</td>
-            </tr>
-        <?php endif; ?>
-    </tbody>
+  <thead>
+    <tr>
+      <th>Reservation No.</th>
+      <th>Buyer(s)</th>
+      <th>Lot</th>
+      <th>Current Step</th>
+      <th>Sales</th>
+      <th>COO</th>
+      <th>Cashier</th>
+      <th>CA</th>
+      <th>CFO</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php foreach ($reservations as $res): ?>
+      <tr>
+        <td><?= $res->id ?></td>
+        <td><?= $res->last_name ?>, <?= $res->first_name  ?></td>
+        <td><?= $res->lot_id ?></td>
+        <td><span class="badge bg-info"><?= strtoupper($res->current_step) ?></span></td>
+
+    
+        <td><?= renderStep($res->approval_logs, 'sales') ?></td>
+        <td><?= renderStep($res->approval_logs, 'coo') ?></td>
+        <td><?= renderStep($res->approval_logs, 'cashier') ?></td>
+        <td><?= renderStep($res->approval_logs, 'credit_assessment') ?></td>
+        <td><?= renderStep($res->approval_logs, 'cfo') ?></td>
+
+        <td>
+          <a href="/reservation/view/<?= $res->id ?>" class="btn btn-sm btn-outline-primary">View</a>
+          <?php if (current_user_role_can_act_on($res->current_step)) : ?>
+            <a href="/reservation/action/<?= $res->id ?>" class="btn btn-sm btn-success">Take Action</a>
+          <?php endif; ?>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+  </tbody>
 </table>
