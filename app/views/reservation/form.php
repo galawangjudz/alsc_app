@@ -420,38 +420,27 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const agentSelect = document.getElementById('agent-select');
-    const manualToggle = document.getElementById('manual-agent-toggle');
-    const manualFields = document.getElementById('manual-agent-fields');
-    const manualName = document.getElementById('manual-agent-name');
-    const manualCode = document.getElementById('manual-agent-code');
     const addAgentBtn = document.getElementById('add-agent-btn');
     const agentTableBody = document.querySelector('#selected-agents-table tbody');
     const maxAgents = 3;
 
-    // Toggle manual input fields
-    manualToggle.addEventListener('change', () => {
-        manualFields.style.display = manualToggle.checked ? 'block' : 'none';
+    // Assign IDs to existing rows based on hidden input values
+    const existingAgentInputs = agentTableBody.querySelectorAll('input[name="agents[]"]');
+    existingAgentInputs.forEach(input => {
+        const agentId = input.value;
+        const row = input.closest('tr');
+        if (agentId && row) {
+            row.id = `agent-row-${agentId}`;
+        }
     });
 
-    // Add agent button click
     addAgentBtn.addEventListener('click', () => {
-        let selectedId, selectedName;
+        const selectedId = agentSelect.value;
+        const selectedName = agentSelect.selectedOptions[0]?.getAttribute('data-name');
 
-        if (manualToggle.checked) {
-            selectedId = manualCode.value.trim();
-            selectedName = manualName.value.trim();
+        if (!selectedId) return;
 
-            if (!selectedId || !selectedName) {
-                alert('Please enter both agent name and code.');
-                return;
-            }
-        } else {
-            selectedId = agentSelect.value;
-            selectedName = agentSelect.selectedOptions[0]?.getAttribute('data-name');
-            if (!selectedId) return;
-        }
-
-        // Check for duplicate
+        // Prevent duplicate agents
         if (document.getElementById(`agent-row-${selectedId}`)) {
             alert('Agent already added.');
             return;
@@ -463,11 +452,9 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Create row
         const row = document.createElement('tr');
         row.id = `agent-row-${selectedId}`;
-
-        const agentRowHTML = `
+        row.innerHTML = `
             <td>
                 <input type="hidden" name="agents[]" value="${selectedId}">
                 ${selectedName}
@@ -482,16 +469,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 <button type="button" class="btn btn-sm btn-danger remove-agent-btn">Remove</button>
             </td>
         `;
-        row.innerHTML = agentRowHTML;
         agentTableBody.appendChild(row);
 
-        // Reset inputs
+        // Reset select
         agentSelect.value = '';
-        manualName.value = '';
-        manualCode.value = '';
     });
 
-    // Remove agent handler
+    // Delegate remove button
     agentTableBody.addEventListener('click', function (e) {
         if (e.target.classList.contains('remove-agent-btn')) {
             e.target.closest('tr').remove();
