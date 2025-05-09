@@ -41,13 +41,62 @@ class Reservations extends Model
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
+    public static function find_co_buyers($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM reservations_buyer  WHERE buyers_account_draft_id = ? and is_primary != 1");
+        $stmt->execute([$id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function find_buyers($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM reservations_buyer  WHERE buyers_account_draft_id = ? order by buyer_id ASC");
+        $stmt->execute([$id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    
     public static function find($id)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("SELECT * FROM {$instance->table} WHERE id = ?");
-        $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_OBJ);
+        $stmt = $instance->db->prepare(" 
+        SELECT 
+            p.c_acronym AS acronym,
+            l.site_id, 
+            l.block, 
+            l.lot,
+            ba.*, 
+            b.*
+        FROM 
+            buyers_account_draft ba
+        LEFT JOIN reservations_buyer b ON ba.id = b.buyers_account_draft_id AND b.is_primary = TRUE
+        LEFT JOIN lots l ON ba.lot_id = l.id
+        LEFT JOIN t_projects p ON l.site_id = p.c_code
+        WHERE buyers_account_draft_id = ?");
+         $stmt->execute([$id]);
+
+         return $stmt->fetch(PDO::FETCH_OBJ);
     }
+
+
+    public static function find_agents($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare(" 
+            SELECT 
+                ac.*, 
+                CONCAT(ag.c_last_name, ' ', ag.c_first_name) AS agent_name
+            FROM 
+                reservations_commission ac
+            LEFT JOIN t_agents ag ON ac.agent_id = ag.c_code
+            WHERE buyers_account_draft_id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+
 
     public static function create_buyer($data)
     {
@@ -163,6 +212,26 @@ class Reservations extends Model
         return $stmt->execute([$id]);
     }
 
+    public static function delete_buyers($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("DELETE FROM reservations_buyer WHERE buyers_account_draft_id = ?");
+        return $stmt->execute([$id]);
+    }
+
+    public static function delete_commissions($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("DELETE FROM reservations_commission WHERE buyers_account_draft_id = ?");
+        return $stmt->execute([$id]);
+    }
+
+    public static function delete_approval_logs($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("DELETE FROM approval_logs WHERE buyers_account_draft_id = ?");
+        return $stmt->execute([$id]);
+    }
     public function attachAgent($agent_id)
     {
         $stmt = $this->db->prepare("INSERT INTO reservation_agents (reservation_id, agent_id) VALUES (?, ?)");

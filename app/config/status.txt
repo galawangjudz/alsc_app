@@ -1,0 +1,28 @@
+
+Summary:
+
+Here’s a quick reference for how each action is used in a workflow:
+
+Draft: Initial creation of the document.
+
+Submitted: Document is sent for review.
+
+Edited: Changes made to the document.
+
+Validated: Document is checked and verified.
+
+Voided: Document or transaction is canceled.
+
+Approved: Document passes the review process and is accepted.
+
+Disapproved: Document fails the review and is rejected.
+
+Revision: Requested changes after disapproval.
+
+Partial Payment: Initial payment is made, but full payment is pending.
+
+Fully Paid: Full payment has been received.
+
+Resubmitted: Document is submitted again after revisions.
+
+Booked: Reservation is confirmed and finalized.

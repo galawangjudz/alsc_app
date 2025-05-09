@@ -4,10 +4,12 @@
 <table class="table table-bordered table-striped">
   <thead>
     <tr>
+      <th>No.</th>
       <th>Reservation No.</th>
       <th>Buyer(s)</th>
       <th>Lot</th>
-      <th>Current Step</th>
+      <th>Current Status</th>
+      <th>Agent</th>
       <th>Sales</th>
       <th>COO</th>
       <th>Cashier</th>
@@ -20,11 +22,11 @@
     <?php foreach ($reservations as $res): ?>
       <tr>
         <td><?= $res->id ?></td>
+        <td><?= $res->reservation_no ?></td>
         <td><?= $res->last_name ?>, <?= $res->first_name  ?></td>
         <td><?= $res->lot_id ?></td>
         <td><span class="badge bg-info"><?= strtoupper($res->current_step) ?></span></td>
-
-    
+        <td><?= renderStep($res->approval_logs, 'agent') ?></td>
         <td><?= renderStep($res->approval_logs, 'sales') ?></td>
         <td><?= renderStep($res->approval_logs, 'coo') ?></td>
         <td><?= renderStep($res->approval_logs, 'cashier') ?></td>
@@ -32,9 +34,9 @@
         <td><?= renderStep($res->approval_logs, 'cfo') ?></td>
 
         <td>
-          <a href="/reservation/view/<?= $res->id ?>" class="btn btn-sm btn-outline-primary">View</a>
+          <a href="<?= url('reservation/show/'. $res->id) ?>" class="btn btn-sm btn-outline-primary">View</a>
           <?php if (current_user_role_can_act_on($res->current_step)) : ?>
-            <a href="/reservation/action/<?= $res->id ?>" class="btn btn-sm btn-success">Take Action</a>
+            <a href="" class="btn btn-sm btn-success">Take Action</a>
           <?php endif; ?>
         </td>
       </tr>

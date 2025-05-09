@@ -12,317 +12,353 @@
    ?>
 
 
-    <form action="<?= url('reservation/store') ?>" method="POST">
-        <div id="reservationWizard">
+<form action="<?= isset($reservation) ? url('reservation/update') : url('reservation/store') ?>" method="POST">
+    <input type="hidden" name="id" value="<?= $reservation->id ?>">
+    <div id="reservationWizard">
 
-            <!-- Step 1: Reservation Type -->
-                <fieldset>
-                    <legend>Type of Accounts</legend>
-                    <div class="form-group">
-                        <label for="acc_type">Account Type:</label>
-                        <select id="acc_type" name="acc_type" class="form-control" required>
-                            <option value="">-- Select Type --</option>
-                            <option value="Lot Only">Lot Only</option>
-                            <option value="Packaged">Packaged</option>
-                            <option value="House Only">House Only</option>
-                            <option value="Fence">Fence Only</option>
-                            <option value="Add Cost">Add Cost</option>
-                        </select>
-                    </div>
-                </fieldset>
+        <!-- Step 1: Reservation Type -->
+        <fieldset>
+            <legend>Type of Accounts</legend>
 
-                <!-- Step 2: Property Selection -->
-                <fieldset>
-                    <legend>Lot Details</legend>
+            <div class="form-group">
+                <label for="acc_type">Account Type:</label>
+                <select id="acc_type" name="acc_type" class="form-control" required>
+                    <option value="">-- Select Type --</option>
+                    <option value="Lot Only" <?= !empty($reservation) && $reservation->account_type == 'Lot Only' ? 'selected' : '' ?>>Lot Only</option>
+                    <option value="Packaged" <?= !empty($reservation) && $reservation->account_type == 'Packaged' ? 'selected' : '' ?>>Packaged</option>
+                    <option value="House Only" <?= !empty($reservation) && $reservation->account_type == 'House Only' ? 'selected' : '' ?>>House Only</option>
+                    <option value="Fence" <?= !empty($reservation) && $reservation->account_type == 'Fence' ? 'selected' : '' ?>>Fence Only</option>
+                    <option value="Add Cost" <?= !empty($reservation) && $reservation->account_type == 'Add Cost' ? 'selected' : '' ?>>Add Cost</option>
+                </select>
+            </div>
+        </fieldset>
 
-                    <div class="form-group">
-                        <label for="lot_id">Select Lot</label>
-                        <select name="lot_id" id="lot_id" class="form-control" required>
-                            <option value="">-- Select Lot --</option>
-                            <?php foreach ($lots as $lot): ?>
-                                <option 
-                                    value="<?= $lot->id ?>"
-                                    data-area="<?= $lot->lot_area ?>"
-                                    data-amount="<?= $lot->lot_area * $lot->price_per_sqm ?>"
-                                    data-lcp="<?= ($lot->lot_area * $lot->price_per_sqm) - ($lot->discount ?? 0) ?>"
-                                    data-house-id="<?= $lot->house_id ?? '' ?>"
-                                    data-house-model="<?= $lot->house_model ?? '' ?>"
-                                    data-house-price="<?= $lot->house_price ?? '' ?>"
-                                    data-floor-area="<?= $lot->house_floor_area ?? '' ?>"
-                                >
-                                    <?= $projectAcronyms[$lot->site_id] ?? $lot->site_id ?> - Block <?= $lot->block ?> Lot <?= $lot->lot ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+        <!-- Step 2: Property Selection -->
+        <fieldset>
+            <legend>Lot Details</legend>
+            <div class="form-group">
+                <label for="lot_id">Select Lot:</label>
+                <select name="lot_id" id="lot_id" class="form-control" required>
+                    <option value="">-- Select Lot --</option>
+                    <?php foreach ($lots as $lot): ?>
+                        <option 
+                            value="<?= $lot->id ?>"
+                            <?= !empty($reservation) && $lot->id == $reservation->lot_id ? 'selected' : '' ?>
+                            data-area="<?= $lot->lot_area ?>"
+                            data-amount="<?= $lot->lot_area * $lot->price_per_sqm ?>"
+                            data-lcp="<?= ($lot->lot_area * $lot->price_per_sqm) - ($lot->discount ?? 0) ?>"
+                            data-house-id="<?= $lot->house_id ?? '' ?>"
+                            data-house-model="<?= $lot->house_model ?? '' ?>"
+                            data-house-price="<?= $lot->house_price ?? '' ?>"
+                            data-floor-area="<?= $lot->house_floor_area ?? '' ?>"
+                        >
+                            <?= $projectAcronyms[$lot->site_id] ?? $lot->site_id ?> - Block <?= $lot->block ?> Lot <?= $lot->lot ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-                    <div class="form-group">
-                        <label>Lot Area (SQM)</label>
-                        <input type="number" name="lot_area" id="lot_area" class="form-control" readonly>
-                    </div>
+            <!-- Lot Details Section -->
+            <div class="form-group">
+                <label>Lot Area (SQM)</label>
+                <input type="number" name="lot_area" id="lot_area" class="form-control" readonly value="<?= $reservation->lot_area ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Lot Amount (₱)</label>
+                <input type="text" id="lot_amount_display" class="form-control currency-format" data-hidden-id="lot_amount" readonly value="<?= $reservation->lot_amount ?? '' ?>">
+                <input type="hidden" name="lot_amount" id="lot_amount" value="<?= $reservation->lot_amount ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Lot Discount (%)</label>
+                <input type="text" id="lot_discount_display" class="form-control currency-format" data-hidden-id="lot_discount" value="<?= $reservation->lot_discount ?? '' ?>">
+                <input type="hidden" name="lot_discount" id="lot_discount" value="<?= $reservation->lot_discount ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Lot Contract Price (₱)</label>
+                <input type="text" id="lcp_display" class="form-control currency-format" data-hidden-id="lcp" readonly value="<?= $reservation->lcp ?? '' ?>">
+                <input type="hidden" name="lcp" id="lcp" value="<?= $reservation->lcp ?? '' ?>">
+            </div>
+        </fieldset>
 
-                    <div class="form-group">
-                        <label>Lot Amount (₱)</label>
-                        <input type="text" id="lot_amount_display" class="form-control currency-format" data-hidden-id="lot_amount" readonly>
-                        <input type="hidden" name="lot_amount" id="lot_amount">
-                    </div>
+        <!-- House Details -->
+        <fieldset>
+            <legend>House Details</legend>
+            <div class="form-group">
+                <label>House Model</label>
+                <select name="house_id" id="house_id" class="form-control">
+                    <option value="">-- Select House --</option>
+                    <?php foreach ($house_models as $house): ?>
+                        <option 
+                            value="<?= $house->c_acronym ?>"
+                            <?= !empty($reservation) && $house->c_model == $reservation->house_model ? 'selected' : '' ?>
+                        >
+                            <?= $house->c_model ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>House Model</label>
+                <input type="text" name="house_model" id="house_model" class="form-control" readonly value="<?= $reservation->house_model ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>House Contract Price (₱)</label>
+                <input type="text" id="house_price_display" class="form-control currency-format" data-hidden-id="house_price" value="<?= $reservation->house_price ?? '' ?>">
+                <input type="hidden" name="house_price" id="house_price" value="<?= $reservation->house_price ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Floor Area (SQM)</label>
+                <input type="number" id="floor_area" name="floor_area" class="form-control" readonly value="<?= $reservation->floor_area ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>House Discount (%)</label>
+                <input type="text" id="house_discount_display" class="form-control currency-format" data-hidden-id="house_discount" value="<?= $reservation->house_discount ?? '' ?>">
+                <input type="hidden" name="house_discount" id="house_discount" value="<?= $reservation->house_discount ?? '' ?>">
+            </div>
+        </fieldset>
 
-                    <div class="form-group">
-                        <label>Lot Discount (%)</label>
-                        <input type="text" id="lot_discount_display" class="form-control currency-format" data-hidden-id="lot_discount">
-                        <input type="hidden" name="lot_discount" id="lot_discount">
-                    </div>
+        <!-- Fence Details -->
+        <fieldset>
+            <legend>Fence</legend>
+            <div class="form-group">
+                <label>Fence Cost (₱)</label>
+                <input type="text" id="fence_cost_display" class="form-control currency-format" data-hidden-id="fence_cost" value="<?= $reservation->fence_cost ?? '' ?>">
+                <input type="hidden" name="fence_cost" id="fence_cost" value="<?= $reservation->fence_cost ?? '' ?>">
+            </div>
+        </fieldset>
 
-                    <div class="form-group">
-                        <label>Lot Contract Price (₱)</label>
-                        <input type="text" id="lcp_display" class="form-control currency-format" data-hidden-id="lcp" readonly>
-                        <input type="hidden" name="lcp" id="lcp">
-                    </div>
-                </fieldset>
+        <!-- Add Cost -->
+        <fieldset>
+            <legend>Add Cost</legend>
+            <div class="form-group">
+                <label>Additional Cost (₱)</label>
+                <input type="text" id="add_cost_display" class="form-control currency-format" data-hidden-id="add_cost" value="<?= $reservation->add_cost ?? '' ?>">
+                <input type="hidden" name="add_cost" id="add_cost" value="<?= $reservation->add_cost ?? '' ?>">
+            </div>
+        </fieldset>
 
-                <!-- House Details -->
-                <fieldset>
-                    <legend>House Details</legend>
-                    <div class="form-group">
-                        <label>House Model</label>
-                        <select name="house_id" id="house_id" class="form-control">
-                            <option value="">-- Select House --</option>
-                            <?php foreach ($house_models as $house): ?>
-                                <option value="<?= $house->c_acronym?>">
-                                    <?= $house->c_model ?> 
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>House Model</label>
-                        <input type="text" name= "house_model" id="house_model" class="form-control" readonly >
-                    </div>
+        <!-- Contract & Financing Details -->
+        <fieldset>
+            <legend>Contract & Financing Details</legend>
+            <div class="form-group">
+                <label>Total Contract Price Discount (%)</label>
+                <input type="number" step="0.01" name="tcp_discount_percent" class="form-control" value="<?= $reservation->tcp_discount_percent ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Total Contract Price Discount Amount (₱)</label>
+                <input type="number" step="0.01" name="tcp_discount_amount" class="form-control" value="<?= $reservation->tcp_discount_amount ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>VAT Amount (₱)</label>
+                <input type="number" step="0.01" name="vat_amount" class="form-control" value="<?= $reservation->vat_amount ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Reservation Fee (₱)</label>
+                <input type="number" step="0.01" name="reservation_fee" class="form-control" value="<?= $reservation->reservation_fee ?? '' ?>">
+            </div>
+        </fieldset>
 
-                    <div class="form-group">
-                        <label>House Contract Price (₱)</label>
-                        <input type="text" id="house_price_display" class="form-control currency-format" data-hidden-id="house_price" >
-                        <input type="hidden" name="house_price" id="house_price">
-                    </div>
+        <!-- Buyer Information -->
+        <fieldset>
+            <legend>Buyer Information</legend>
 
-                    <div class="form-group">
-                        <label>Floor Area (SQM)</label>
-                        <input type="number" id="floor_area" name="floor_area" class="form-control" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label>House Discount (%)</label>
-                        <input type="text" id="house_discount_display" class="form-control currency-format" data-hidden-id="house_discount">
-                        <input type="hidden" name="house_discount" id="house_discount">
-                    </div>
-                </fieldset>
-
-                <!-- Fence -->
-                <fieldset>
-                    <legend>Fence</legend>
-                    <div class="form-group">
-                        <label>Fence Cost (₱)</label>
-                        <input type="text" id="fence_cost_display" class="form-control currency-format" data-hidden-id="fence_cost">
-                        <input type="hidden" name="fence_cost" id="fence_cost">
-                    </div>
-                </fieldset>
-
-                <!-- Add Cost -->
-                <fieldset>
-                    <legend>Add Cost</legend>
-                    <div class="form-group">
-                        <label>Additional Cost (₱)</label>
-                        <input type="text" id="add_cost_display" class="form-control currency-format" data-hidden-id="add_cost">
-                        <input type="hidden" name="add_cost" id="add_cost">
-                    </div>
-
-                </fieldset>
-
-
-                <fieldset>
-                    <legend>Contract & Financing Details</legend>
-
-                    <div class="form-group">
-                        <label>Total Contract Price Discount (%)</label>
-                        <input type="number" step="0.01" name="tcp_discount_percent" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Total Contract Price Discount Amount (₱)</label>
-                        <input type="number" step="0.01" name="tcp_discount_amount" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>VAT Amount (₱)</label>
-                        <input type="number" step="0.01" name="vat_amount" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Reservation Fee (₱)</label>
-                        <input type="number" step="0.01" name="reservation_fee" class="form-control">
-                    </div>
-
-                   
-                </fieldset>
-                
-                <fieldset>
-                    <legend>Buyer Information</legend>
-
-                    <div id="buyers-container">
-                        <!-- Buyer 1 -->
+            <div id="buyers-container">
+                <?php if (!empty($buyers)): ?>
+                    <!-- Edit mode: Display existing buyers -->
+                    <?php foreach ($buyers as $buyer_id => $buyer): ?>
                         <div class="buyer-group mb-3">
-                            <h5>Buyer 1</h5>
+                            <h5>Buyer</h5>
                             <div class="form-group">
-                                <label>FirstName</label>
-                                <input type="text" name="buyers[0][first_name]" class="form-control" required>
+                                <label>First Name</label>
+                                <input type="text" name="buyers[<?= $buyer_id ?>][first_name]" class="form-control" required value="<?= htmlspecialchars($buyer['first_name'] ?? '') ?>">
                             </div>
                             <div class="form-group">
                                 <label>Last Name</label>
-                                <input type="text" name="buyers[0][last_name]" class="form-control" required>
+                                <input type="text" name="buyers[<?= $buyer_id ?>][last_name]" class="form-control" required value="<?= htmlspecialchars($buyer['last_name'] ?? '') ?>">
                             </div>
                             <div class="form-group">
                                 <label>Contact</label>
-                                <textarea name="buyers[0][contact_no]" class="form-control" required></textarea>
+                                <textarea name="buyers[<?= $buyer_id ?>][contact_no]" class="form-control" required><?= htmlspecialchars($buyer['contact_no'] ?? '') ?></textarea>
                             </div>
-                            <button type="button" class="btn btn-sm btn-danger remove-buyer-btn mt-2 d-none">Remove</button>
+                            <button type="button" class="btn btn-sm btn-danger remove-buyer-btn mt-2">Remove</button>
                             <hr>
                         </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <!-- Create mode: Default first buyer form -->
+                    <div class="buyer-group mb-3">
+                        <h5>Buyer 1</h5>
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" name="buyers[0][first_name]" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" name="buyers[0][last_name]" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contact</label>
+                            <textarea name="buyers[0][contact_no]" class="form-control" required></textarea>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger remove-buyer-btn mt-2 d-none">Remove</button>
+                        <hr>
                     </div>
+                <?php endif; ?>
+            </div>
 
-                    <button type="button" class="btn btn-sm btn-success" id="add-buyer-btn">Add Another Buyer</button>
-                </fieldset>
-
-           
-            <!-- Step 3: Payment Computation -->
-            <fieldset>
-                <legend>Payment Scheme</legend>
-                <div class="form-group">
-                    <label for="payment_type_primary">Primary Payment Type:</label>
-                    <select name="payment_type_primary" id="payment_type_primary" class="form-control" required>
-                        <option value="">-- Select --</option>
-                        <option value="PD">Partial DownPayment</option>
-                        <option value="FD">Full DownPayment</option>
-                        <option value="ND">No Downpayment</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="payment_type_secondary">Secondary Payment Type:</label>
-                    <select name="payment_type_secondary" id="payment_type_secondary" class="form-control">
-                        <option value="">-- Select --</option>
-                        <option value="MA">Monthly Amortization</option>
-                        <option value="DFC">Deferred Cash Payment</option>
-                        <option value="SC">Spot Cash</option>
-                    </select>
-                </div>
-            </fieldset>
-
-            <fiedset>
-                    <div class="form-group">
-                        <label>Down Payment Percent (%)</label>
-                        <input type="number" step="0.01" name="down_payment_percent" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>NeT Down Payments</label>
-                        <input type="number" name="net_down_payment" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Number of Down Payments</label>
-                        <input type="number" name="number_of_payments" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Monthly Down Payment (₱)</label>
-                        <input type="number" step="0.01" name="monthly_down_payment" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>1st Down Payment Date</label>
-                        <input type="date" name="first_down_payment_date" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Full Down Payment Due Date</label>
-                        <input type="date" name="full_down_payment_due_date" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Amount to be Financed (₱)</label>
-                        <input type="number" step="0.01" name="amount_financed" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Term (months)</label>
-                        <input type="number" step="0.01" name="term_months" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Interest Rate (%)</label>
-                        <input type="number" step="0.01" name="interest_rate" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Fixed Factor</label>
-                        <input type="number" step="0.0001" name="fixed_factor" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Monthly Amortization (₱)</label>
-                        <input type="number" step="0.01" name="monthly_amortization" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Amortization Start Date</label>
-                        <input type="date" name="amortization_start_date" class="form-control">
-                    </div>
+            <button type="button" class="btn btn-sm btn-success" id="add-buyer-btn">Add Another Buyer</button>
+        </fieldset>
 
 
-            </fieldset>
+        <!-- Step 3: Payment Computation -->
+        <fieldset>
+            <legend>Payment Scheme</legend>
+
+            <!-- Primary Payment Type -->
+            <div class="form-group">
+                <label for="payment_type_primary">Primary Payment Type:</label>
+                <select name="payment_type_primary" id="payment_type_primary" class="form-control" required>
+                    <option value="">-- Select --</option>
+                    <option value="PD" <?= !empty($reservation) && $reservation->payment_type_primary == 'PD' ? 'selected' : '' ?>>Partial DownPayment</option>
+                    <option value="FD" <?= !empty($reservation) && $reservation->payment_type_primary == 'FD' ? 'selected' : '' ?>>Full DownPayment</option>
+                    <option value="ND" <?= !empty($reservation) && $reservation->payment_type_primary == 'ND' ? 'selected' : '' ?>>No Downpayment</option>
+                </select>
+            </div>
+
+            <!-- Secondary Payment Type -->
+            <div class="form-group">
+                <label for="payment_type_secondary">Secondary Payment Type:</label>
+                <select name="payment_type_secondary" id="payment_type_secondary" class="form-control">
+                    <option value="">-- Select --</option>
+                    <option value="MA" <?= !empty($reservation) && $reservation->payment_type_secondary == 'MA' ? 'selected' : '' ?>>Monthly Amortization</option>
+                    <option value="DFC" <?= !empty($reservation) && $reservation->payment_type_secondary == 'DFC' ? 'selected' : '' ?>>Deferred Cash Payment</option>
+                    <option value="SC" <?= !empty($reservation) && $reservation->payment_type_secondary == 'SC' ? 'selected' : '' ?>>Spot Cash</option>
+                </select>
+            </div>
+
+        </fieldset>
 
 
-            <!-- Step 4: Agent Selection -->
-            
-            <fieldset>
-                <legend>Agent Selection</legend>
-                
-                <div class="form-group">
-                    <label for="agent-select">Select Agent:</label>
-                    <select id="agent-select" class="form-control">
-                        <option value="">-- Select Agent --</option>
-                        <?php foreach ($agents as $agent): ?>
-                            <option value="<?= $agent->c_code ?>" data-name="<?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>">
-                                <?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>
-                            </option>
+        <!-- Down Payment Information -->
+        <fieldset>
+            <div class="form-group">
+                <label>Down Payment Percent (%)</label>
+                <input type="number" step="0.01" name="down_payment_percent" class="form-control" value="<?= $reservation->down_payment_percent ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Net Down Payments</label>
+                <input type="number" name="net_down_payment" class="form-control" value="<?= $reservation->net_down_payment ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Number of Down Payments</label>
+                <input type="number" name="number_of_payments" class="form-control" value="<?= $reservation->number_of_payments ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Monthly Down Payment (₱)</label>
+                <input type="number" step="0.01" name="monthly_down_payment" class="form-control" value="<?= $reservation->monthly_down_payment ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>1st Down Payment Date</label>
+                <input type="date" name="first_down_payment_date" class="form-control" value="<?= $reservation->first_down_payment_date ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Full Down Payment Due Date</label>
+                <input type="date" name="full_down_payment_due_date" class="form-control" value="<?= $reservation->full_down_payment_due_date ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Amount to be Financed (₱)</label>
+                <input type="number" step="0.01" name="amount_financed" class="form-control" value="<?= $reservation->amount_financed ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Term (months)</label>
+                <input type="number" step="0.01" name="term_months" class="form-control" value="<?= $reservation->term_months ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Interest Rate (%)</label>
+                <input type="number" step="0.01" name="interest_rate" class="form-control" value="<?= $reservation->interest_rate ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Fixed Factor</label>
+                <input type="number" step="0.0001" name="fixed_factor" class="form-control" value="<?= $reservation->fixed_factor ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Monthly Amortization (₱)</label>
+                <input type="number" step="0.01" name="monthly_amortization" class="form-control" value="<?= $reservation->monthly_amortization ?? '' ?>">
+            </div>
+            <div class="form-group">
+                <label>Amortization Start Date</label>
+                <input type="date" name="amortization_start_date" class="form-control" value="<?= $reservation->amortization_start_date ?? '' ?>">
+            </div>
+        </fieldset>
+
+        <!-- Step 4: Agent Selection -->
+        <fieldset>
+            <legend>Agent Selection</legend>
+
+            <!-- Select Agent -->
+            <div class="form-group">
+                <label for="agent-select">Select Agent:</label>
+                <select id="agent-select" class="form-control">
+                    <option value="">-- Select Agent --</option>
+                    <?php foreach ($all_agents as $agent): ?>
+                        <option value="<?= $agent->c_code ?>" data-name="<?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>">
+                            <?= $agent->c_last_name ?>, <?= $agent->c_first_name ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <button type="button" class="btn btn-sm btn-success mb-2" id="add-agent-btn">Add Agent</button>
+
+            <!-- Selected Agents Table -->
+            <table class="table" id="selected-agents-table">
+                <thead>
+                    <tr>
+                        <th>Agent Name</th>
+                        <th>Commission Rate %</th>
+                        <th>Commission Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamically added rows will be here -->
+                    <?php if (!empty($agents)): ?>
+                        <?php foreach ($agents as $c): ?>
+                            <tr id="agent-row-<?= htmlspecialchars($c->id ?? ''); ?>">
+                                <td>
+                                    <input type="hidden" name="agents[]" value="<?= htmlspecialchars($c->id ?? ''); ?>">
+                                    <?= htmlspecialchars($c->agent_name ?? ''); ?>
+                                </td>
+                                <td>
+                                    <input type="number" name="agent_commission_rate[<?= htmlspecialchars($c->id ?? ''); ?>]" class="form-control" step="0.01"  required value="<?= number_format($c->rate ?? 0, 2); ?>">
+                                </td>
+                                <td>
+                                    <input type="number" name="agent_commission_amount[<?= htmlspecialchars($c->id ?? ''); ?>]" class="form-control" step="0.01"  required value="₱<?= number_format($c->commission_amount ?? 0, 2); ?>">
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-danger remove-agent-btn">Remove</button>
+                                </td>
+                            </tr>
                         <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <button type="button" class="btn btn-sm btn-success mb-2" id="add-agent-btn">Add Agent</button>
-
-                <table class="table" id="selected-agents-table">
-                    <thead>
+                    <?php else: ?>
                         <tr>
-                            <th>Agent Name</th>
-                            <th>Commission Rate %</th>
-                            <th>Commission Amount</th>
-                            <th>Action</th>
+                            <td colspan="4">No agents available.</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Rows will be dynamically added -->
-                    </tbody>
-                </table>
-            </fieldset>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+
+        </fieldset>
 
 
-        </div>
 
+        <!-- Submit Button -->
         <div class="mt-4 text-center">
-            <button type="submit" class="btn btn-primary"> Submit </button>
+            <button type="submit" class="btn btn-primary">Save Reservation</button>
         </div>
     </form>
-</div>
 
+</div>
 <!-- Wizard Script -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-steps/1.1.0/jquery.steps.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -346,88 +382,75 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
 <script>
-const houseModels = <?= json_encode($house_models) ?>;
+document.addEventListener('DOMContentLoaded', function () {
+    let buyerIndex = <?= count($buyers ?? []) ?>;
 
-document.getElementById('lot_id').addEventListener('change', function () {
-    const selected = this.options[this.selectedIndex];
+    // Add Buyer
+    document.getElementById('add-buyer-btn').addEventListener('click', function () {
+        const container = document.getElementById('buyers-container');
+        const newBuyer = document.createElement('div');
+        newBuyer.className = 'buyer-group mb-3';
+        newBuyer.innerHTML = `
+            <h5>Buyer ${buyerIndex + 1}</h5>
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" name="buyers[${buyerIndex}][first_name]" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" name="buyers[${buyerIndex}][last_name]" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Contact</label>
+                <textarea name="buyers[${buyerIndex}][contact_no]" class="form-control" required></textarea>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger remove-buyer-btn mt-2">Remove</button>
+            <hr>
+        `;
+        container.appendChild(newBuyer);
+        buyerIndex++;
+    });
 
-    const area = selected.getAttribute('data-area');
-    const amount = selected.getAttribute('data-amount');
-    const lcp = selected.getAttribute('data-lcp');
-    const discount = selected.getAttribute('data-discount') || 0;
+    // Remove Buyer (event delegation)
+    document.getElementById('buyers-container').addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('remove-buyer-btn')) {
+            e.target.closest('.buyer-group').remove();
+        }
+    });
 
-    document.getElementById('lot_area').value = area;
-    document.getElementById('lot_amount').value = amount;
-    document.getElementById('lot_amount_display').value = amount;
-    document.getElementById('lot_discount').value = discount;
-    document.getElementById('lot_discount_display').value = discount;
-    document.getElementById('lcp').value = lcp;
-    document.getElementById('lcp_display').value = lcp;
+    // Auto-update Lot and House details
+    document.getElementById('lot_id').addEventListener('change', function () {
+        const selectedOption = this.options[this.selectedIndex];
 
-    // House Details
-    const houseId = selected.getAttribute('data-house-id');
-    const houseModelText = selected.getAttribute('data-house-model');
-    const housePrice = selected.getAttribute('data-house-price');
-    const floorArea = selected.getAttribute('data-floor-area');
-    const houseDiscount = selected.getAttribute('data-house-discount') || 0;
+        const setValue = (id, value) => {
+            const input = document.getElementById(id);
+            if (input) input.value = value;
+        };
 
-    const houseSelect = document.getElementById('house_id');
-    const houseModelInput = document.getElementById('house_model');
+        setValue('lot_area', selectedOption.dataset.area);
+        setValue('lot_amount', selectedOption.dataset.amount);
+        setValue('lot_amount_display', selectedOption.dataset.amount);
+        setValue('lcp', selectedOption.dataset.lcp);
+        setValue('lcp_display', selectedOption.dataset.lcp);
+        setValue('house_id', selectedOption.dataset.houseId);
+        setValue('house_model', selectedOption.dataset.houseModel);
+        setValue('house_price', selectedOption.dataset.housePrice);
+        setValue('house_price_display', selectedOption.dataset.housePrice);
+        setValue('floor_area', selectedOption.dataset.floorArea);
+    });
 
-    // Reset select
-    houseSelect.innerHTML = '';
+    // Optional: currency formatting
+    document.querySelectorAll('.currency-format').forEach(input => {
+        input.addEventListener('input', function () {
+            const hiddenId = this.dataset.hiddenId;
+            const hiddenInput = document.getElementById(hiddenId);
+            const value = this.value.replace(/[₱,]/g, '').trim();
 
-    // Add placeholder
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = '-- Select House --';
-    houseSelect.appendChild(defaultOption);
-
-    if (houseId) {
-        const matched = houseModels.find(h => h.c_acronym === houseId);
-        const option = document.createElement('option');
-        option.value = houseId;
-        option.textContent = matched ? matched.c_model : houseModelText;
-        option.selected = true;
-        houseSelect.appendChild(option);
-        houseSelect.disabled = true;
-
-        houseSelect.value = houseId;
-        houseModelInput.value = houseModelText;
-        document.getElementById('house_price').value = housePrice;
-        document.getElementById('house_price_display').value = housePrice;
-        document.getElementById('floor_area').value = floorArea;
-        document.getElementById('house_discount').value = houseDiscount;
-        document.getElementById('house_discount_display').value = houseDiscount;
-    } else {
-        houseModels.forEach(house => {
-            const option = document.createElement('option');
-            option.value = house.c_acronym;
-            option.textContent = house.c_model;
-            houseSelect.appendChild(option);
+            if (hiddenInput) hiddenInput.value = parseFloat(value) || 0;
         });
-        houseSelect.disabled = false;
-
-        houseSelect.value = '';
-        houseModelInput.value = '';
-        document.getElementById('house_price').value = '';
-        document.getElementById('house_price_display').value = '';
-        document.getElementById('floor_area').value = '';
-        document.getElementById('house_discount').value = '';
-        document.getElementById('house_discount_display').value = '';
-    }
+    });
 });
 </script>
-
-<script>
-    document.getElementById('house_id').addEventListener('change', function () {
-        const selectedOption = this.options[this.selectedIndex];
-        const modelText = selectedOption.textContent || '';
-        document.getElementById('house_model').value = modelText;
-    });
-</script>
-
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const agentSelect = document.getElementById('agent-select');
@@ -484,78 +507,3 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-
-<script>
-    let buyerIndex = 1;  // Start with the second buyer
-    
-    document.getElementById('add-buyer-btn').addEventListener('click', function() {
-        // Create new buyer group
-        const newBuyerGroup = document.createElement('div');
-        newBuyerGroup.classList.add('buyer-group', 'mb-3');
-        newBuyerGroup.setAttribute('data-buyer-index', buyerIndex);
-
-        newBuyerGroup.innerHTML = `
-            <h5>Buyer ${buyerIndex + 1}</h5>
-            <div class="form-group">
-                <label>First Name</label>
-                <input type="text" name="buyers[${buyerIndex}][first_name]" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Last Name</label>
-                <input type="text" name="buyers[${buyerIndex}][last_name]" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Contact</label>
-                <textarea name="buyers[${buyerIndex}][contact_no]" class="form-control" required></textarea>
-            </div>
-            <button type="button" class="btn btn-sm btn-danger remove-buyer-btn mt-2">Remove</button>
-            <hr>
-        `;
-
-        // Append the new buyer group to the container
-        document.getElementById('buyers-container').appendChild(newBuyerGroup);
-
-        // Show the "remove" button for all buyers after the first
-        const removeButtons = document.querySelectorAll('.remove-buyer-btn');
-        removeButtons.forEach((btn, index) => {
-            btn.classList.remove('d-none');
-            // Disable remove button for the first buyer to prevent deleting all
-            if (index === 0) {
-                btn.classList.add('d-none');
-            }
-        });
-
-        buyerIndex++; // Increment buyer index for the next buyer
-    });
-
-    // Remove buyer event handler
-    document.getElementById('buyers-container').addEventListener('click', function(event) {
-        if (event.target && event.target.classList.contains('remove-buyer-btn')) {
-            const buyerGroup = event.target.closest('.buyer-group');
-            if (buyerGroup) {
-                buyerGroup.remove();
-                // Reorder the buyer indices
-                const buyerGroups = document.querySelectorAll('.buyer-group');
-                buyerGroups.forEach((group, index) => {
-                    const newIndex = index;
-                    group.setAttribute('data-buyer-index', newIndex);
-                    const inputFields = group.querySelectorAll('input, textarea');
-                    inputFields.forEach(field => {
-                        field.name = field.name.replace(/\[\d+\]/, `[${newIndex}]`);
-                    });
-                });
-
-                // Update the remove buttons (hide/remove the button for the first buyer)
-                const removeButtons = document.querySelectorAll('.remove-buyer-btn');
-                removeButtons.forEach((btn, index) => {
-                    if (index === 0) {
-                        btn.classList.add('d-none');
-                    } else {
-                        btn.classList.remove('d-none');
-                    }
-                });
-            }
-        }
-    });
-</script>
-

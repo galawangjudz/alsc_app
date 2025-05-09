@@ -75,3 +75,63 @@ CREATE TABLE buyers_account_draft (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+
+CREATE TABLE approval_logs (
+    id SERIAL PRIMARY KEY,
+    buyers_account_draft_id INTEGER NOT NULL REFERENCES buyers_account_draft(id) ON DELETE CASCADE,
+
+    -- Role that performed the action (agent, sales, coo, cashier, ca, cfo)
+    step VARCHAR(50) NOT NULL CHECK (
+        step IN ('agent', 'sales', 'coo', 'cashier', 'ca', 'cfo')
+    ),
+
+    -- Action taken during this step
+    action VARCHAR(50) NOT NULL CHECK (
+        action IN (
+            'draft', 'submitted', 'edited', 'validated', 'voided',
+            'approved', 'disapproved', 'revision',
+            'partial payment', 'fully paid', 'resubmitted',
+            'booked'
+        )
+    ),
+
+    -- User ID of the person who performed the action
+    performed_by_user_id INTEGER NOT NULL REFERENCES users(id),
+
+    -- Optional: store user's role redundantly for history snapshots
+    performed_by_role VARCHAR(50),
+
+    -- Optional notes or remarks
+    comments TEXT,
+
+    -- Optional: approval cycle count (for tracking how many loops happened)
+    cycle INT DEFAULT 1,
+
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+CREATE OR REPLACE FUNCTION prevent_voided_update()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.is_voided THEN
+    RAISE EXCEPTION 'Cannot modify a voided reservation draft.';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_no_update_if_voided
+BEFORE UPDATE ON buyers_account_draft
+FOR EACH ROW
+WHEN (OLD.is_voided = TRUE)
+EXECUTE FUNCTION prevent_voided_update();
+
+
+
+CREATE INDEX idx_logs_draft_id ON approval_logs(buyers_account_draft_id);
+CREATE INDEX idx_logs_step ON approval_logs(step);
+CREATE INDEX idx_logs_action ON approval_logs(action);

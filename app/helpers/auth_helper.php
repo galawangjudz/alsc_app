@@ -24,6 +24,7 @@ function can($permission)
 function current_user_role_can_act_on($current_step) {
     // Map numeric role IDs to their role names
     $role_map = [
+        10 => 'agent',
         1 => 'admin',
         2 => 'sales',
         3 => 'coo',
@@ -38,6 +39,7 @@ function current_user_role_can_act_on($current_step) {
 
     // Define which roles can act on each step
     $permissions = [
+        'agent' => ['agent', 'admin'],
         'sales' => ['sales', 'admin'],
         'coo' => ['coo', 'admin'],
         'cashier' => ['cashier', 'admin'],
@@ -48,7 +50,7 @@ function current_user_role_can_act_on($current_step) {
     return in_array($user_role, $permissions[$current_step] ?? []);
 }
 
-function renderStep($logs, $step) {
+function renderStep_old($logs, $step) {
     $log = array_filter($logs, fn($l) => $l->step === $step);
     if (!$log) return '<span class="badge bg-secondary">Pending</span>';
     $log = array_shift($log);
@@ -61,4 +63,25 @@ function renderStep($logs, $step) {
         default => 'secondary'
     };
     return "<span class='badge bg-{$badge}'>" . ucfirst($status) . "</span>";
+}
+
+function renderStep($logs, $step) {
+ 
+    $step_logs = array_filter($logs, fn($l) => $l->step === $step);
+    if (empty($step_logs)) return '<span class="badge bg-secondary">Pending</span>';
+    // Sort logs for the step by created_at (descending order) to get the most recent one
+    usort($step_logs, fn($a, $b) => strtotime($b->created_at) - strtotime($a->created_at));
+    // Get the most recent log for the step
+    $latest_log = $step_logs[0];
+    // Determine the badge color based on the status
+    $badge = match($latest_log->status) {
+        'approved' => 'success',
+        'validated' => 'primary',
+        'voided', 'disapproved' => 'danger',
+        'for revision' => 'warning',
+        default => 'secondary'
+    };
+
+    // Return the badge with the status
+    return "<span class='badge bg-{$badge}'>" . ucfirst($latest_log->status) . "</span>";
 }

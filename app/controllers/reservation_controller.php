@@ -140,9 +140,26 @@ class Reservation extends Controller
         ApprovalLog::log($reservation, 'agent', 'draft', current_user_id(),current_user_role());
 
         ActivityLog::log(current_user_id(), 'add', 'Reservation', "Draft created for {$reservation}");
+
+
         return $this->redirect("reservation/index");
 
     }
+
+    public function delete($id)
+    {
+        if ($reservation->status !== 'draft') {
+            return $this->view('error', ['message' => 'Deleting is allowed only in draft.']);
+        }
+        Reservations::delete_buyers($id);
+        Reservations::delete_commissions($id);
+        Reservations::delete_approval_logs($id);
+        Reservations::delete($id);
+
+        ActivityLog::log(current_user_id(), 'delete', 'Reservation', "Draft deleted for {$id}");
+        return $this->view('reservation/index');
+    }
+
 
 
     public function edit($id)
@@ -153,28 +170,118 @@ class Reservation extends Controller
             return $this->view('error', ['message' => 'Editing is allowed only in draft.']);
         }
 
+        $buyers = Reservations::find_buyers($id);
+        $agents = Reservations::find_agents($id);
         $projects = Projects::all();
         $lots = Lot::all_available();
         $houses = House::all();
         $house_models = HouseModel::all();
-        $agents = Agent::all();
-        return $this->view('reservation/edit', compact('reservation', 'projects', 'lots', 'houses', 'house_models', 'agents'));
+        $all_agents = Agent::all();
+        //echo "<pre>";print_r($agents); exit;
+        return $this->view('reservation/edit', compact('reservation','buyers','agents', 'projects', 'lots', 'houses', 'house_models', 'all_agents'));
     }
 
-    public function update($id)
+    public function update()
     {
-        $data = $_POST;
-        $reservation = Reservations::find($id);
-
-        if ($reservation->status !== 'draft') {
-            return $this->view('error', ['message' => 'Only draft reservations can be updated.']);
+        $id = $_POST['id'] ?? null;
+        if (!$id) {
+            // Handle missing ID
+            die("Reservation ID is required for update.");
         }
 
-        $reservation->update($data);
+        // 1. Prepare the updated reservation data
+        $accountData = [
+            'account_no' => $_POST['account_no'] ?? null,
+            'lot_id' => $_POST['lot_id'] ?? null,
+            'date_of_sale' => $_POST['date_of_sale'] ?? date('Y-m-d'),
 
-        ActivityLog::log(current_user_id(), 'update', 'Reservation', "Updated draft ID {$id}");
-        return $this->redirect("reservation/view/{$id}");
+            'account_type' => $_POST['acc_type'],
+            'account_type_secondary' => $_POST['acc_type_secondary'] ?? null,
+
+            'lot_area' => $_POST['lot_area'] ?? null,
+            'lot_price_per_sqm' => $_POST['lot_price_per_sqm'] ?? 0,
+            'lot_discount_percent' => $_POST['lot_discount_percent'] ?? 0,
+            'lot_discount_amount' => $_POST['lot_discount'] ?? 0,
+
+            'house_model' => $_POST['house_model'] ?? null,
+            'floor_area' => $_POST['floor_area'] ?? null,
+            'house_price_per_sqm' => $_POST['house_price'] ?? 0,
+            'house_discount_percent' => $_POST['house_discount_percent'] ?? 0,
+            'house_discount_amount' => $_POST['house_discount'] ?? 0,
+
+            'tcp_discount_percent' => $_POST['tcp_discount_percent'] ?? 0,
+            'tcp_discount_amount' => $_POST['tcp_discount_amount'] ?? 0,
+
+            'total_contract_price' => $_POST['lcp'] ?? null,
+            'vat_amount' => $_POST['vat_amount'] ?? 0,
+            'net_total_contract_price' => $_POST['net_lcp'] ?? $_POST['lcp'],
+
+            'reservation_fee' => $_POST['reservation_fee'] ?? 0,
+
+            'payment_type_primary' => $_POST['payment_type_primary'],
+            'payment_type_secondary' => $_POST['payment_type_secondary'] ?? null,
+
+            'down_payment_percent' => $_POST['down_payment_percent'] ?? 0,
+            'net_down_payment' => $_POST['net_down_payment'] ?? 0,
+
+            'number_of_payments' => $_POST['number_of_payments'] ?? null,
+            'monthly_down_payment' => $_POST['monthly_down_payment'] ?? null,
+            'first_down_payment_date' => $_POST['first_down_payment_date'] ?? null,
+            'full_down_payment_due_date' => $_POST['full_down_payment_due_date'] ?? null,
+
+            'amount_financed' => $_POST['amount_financed'] ?? 0,
+            'financing_terms_months' => $_POST['term_months'],
+            'interest_rate' => $_POST['interest_rate'] ?? 0,
+            'fixed_factor' => $_POST['fixed_factor'] ?? 0,
+            'monthly_amortization' => $_POST['monthly_amortization'] ?? 0,
+            'amortization_start_date' => $_POST['amortization_start_date'] ?? null,
+
+            'fence_cost' => $_POST['fence_cost'] ?? 0,
+            'add_cost' => $_POST['add_cost'] ?? 0,
+
+            'is_voided' => 0,
+            'voided_by' => null,
+            'void_reason' => null,
+        ];
+
+        // 2. Update reservation record
+        Reservations::update($id, $accountData);
+
+        // 3. Update buyers — strategy: delete all then re-insert (or use an update strategy per record)
+        Reservations::delete_buyers($id);
+        if (isset($_POST['buyers']) && is_array($_POST['buyers'])) {
+            foreach ($_POST['buyers'] as $index => $buyer) {
+                if (!empty($buyer['first_name']) && !empty($buyer['last_name'])) {
+                    Reservations::create_buyer([
+                        'buyers_account_draft_id' => $id,
+                        'last_name'         => $buyer['last_name'] ?? '',
+                        'first_name'        => $buyer['first_name'] ?? '',
+                        'contact_no'        => $buyer['contact_no'] ?? '',
+                        'is_primary'        => $index === 0 ? 1 : 0,
+                    ]);
+                }
+            }
+        }
+
+        // 4. Update agent commissions — delete then re-insert
+        Reservations::delete_commissions($id);
+        if (isset($_POST['agents']) && is_array($_POST['agents'])) {
+            foreach ($_POST['agents'] as $agentId) {
+                Reservations::create_rsv_commission([
+                    'buyers_account_draft_id' => $id,
+                    'agent_id' => $agentId,
+                    'commission_amount' => $_POST['agent_commission_amount'][$agentId] ?? 0,
+                    'rate' => $_POST['agent_commission_rate'][$agentId] ?? 0,
+                ]);
+            }
+        }
+
+        ApprovalLog::log($id, 'agent', 'edited', current_user_id(), current_user_role());
+        ActivityLog::log(current_user_id(), 'update', 'Reservation', "Draft updated for {$id}");
+
+        return $this->redirect("reservation/index");
     }
+
 
     public function validateReservation($id)
     {
@@ -266,9 +373,19 @@ class Reservation extends Controller
     public function show($id)
     {
         $reservation = Reservations::find($id);
-        $approval_logs = ApprovalLog::forReservation($id);
-        return $this->view('reservation/view', compact('reservation', 'approval_logs'));
+
+        if (!$reservation) {
+            // Handle the case when reservation is not found
+            return $this->view('reservation/not_found');
+        }
+
+        $buyers = Reservations::find_co_buyers($id);
+        $agents = Reservations::find_agents($id);
+       
+        //echo "<pre>";print_r($agents); exit;
+        return $this->view('reservation/view',compact('reservation', 'buyers', 'agents'));
     }
+
 
     public function generatePDF($id)
     {
