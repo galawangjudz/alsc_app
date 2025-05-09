@@ -13,7 +13,9 @@
 
 
 <form action="<?= isset($reservation) ? url('reservation/update') : url('reservation/store') ?>" method="POST">
-    <input type="hidden" name="id" value="<?= $reservation->id ?>">
+    <?php if (!empty($reservation->id)): ?>
+        <input type="hidden" name="id" value="<?= htmlspecialchars($reservation->id) ?>">
+    <?php endif; ?>
     <div id="reservationWizard">
 
         <!-- Step 1: Reservation Type -->
@@ -295,7 +297,7 @@
         <fieldset>
             <legend>Agent Selection</legend>
 
-            <!-- Select Agent -->
+            <!-- Agent Dropdown -->
             <div class="form-group">
                 <label for="agent-select">Select Agent:</label>
                 <select id="agent-select" class="form-control">
@@ -307,7 +309,6 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-
             <button type="button" class="btn btn-sm btn-success mb-2" id="add-agent-btn">Add Agent</button>
 
             <!-- Selected Agents Table -->
@@ -321,33 +322,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Dynamically added rows will be here -->
-                    <?php if (!empty($agents)): ?>
-                        <?php foreach ($agents as $c): ?>
-                            <tr id="agent-row-<?= htmlspecialchars($c->id ?? ''); ?>">
-                                <td>
-                                    <input type="hidden" name="agents[]" value="<?= htmlspecialchars($c->id ?? ''); ?>">
-                                    <?= htmlspecialchars($c->agent_name ?? ''); ?>
-                                </td>
-                                <td>
-                                    <input type="number" name="agent_commission_rate[<?= htmlspecialchars($c->id ?? ''); ?>]" class="form-control" step="0.01"  required value="<?= number_format($c->rate ?? 0, 2); ?>">
-                                </td>
-                                <td>
-                                    <input type="number" name="agent_commission_amount[<?= htmlspecialchars($c->id ?? ''); ?>]" class="form-control" step="0.01"  required value="₱<?= number_format($c->commission_amount ?? 0, 2); ?>">
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-danger remove-agent-btn">Remove</button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="4">No agents available.</td>
+                <?php if (!empty($agents)): ?>
+                    <?php foreach ($agents as $agent): ?>
+                        <tr id="agent-row-<?= $agent->agent_id ?>" class="agent-row">
+                            <td>
+                                <input type="hidden" name="agents[]" value="<?= htmlspecialchars($agent->agent_id) ?>">
+                                <?= htmlspecialchars($agent->agent_name) ?>
+                            </td>
+                            <td>
+                                <input type="number" name="agent_commission_rate[<?= $agent->agent_id ?>]" 
+                                    class="form-control" step="0.01" min="0" required 
+                                    value="<?= htmlspecialchars($agent->rate) ?>">
+                            </td>
+                            <td>
+                                <input type="number" name="agent_commission_amount[<?= $agent->agent_id ?>]" 
+                                    class="form-control" step="0.01" min="0" required 
+                                    value="<?= htmlspecialchars($agent->commission_amount) ?>">
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-danger remove-agent-btn">Remove</button>
+                            </td>
                         </tr>
-                    <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
                 </tbody>
             </table>
-
         </fieldset>
 
 
@@ -383,40 +383,6 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    let buyerIndex = <?= count($buyers ?? []) ?>;
-
-    // Add Buyer
-    document.getElementById('add-buyer-btn').addEventListener('click', function () {
-        const container = document.getElementById('buyers-container');
-        const newBuyer = document.createElement('div');
-        newBuyer.className = 'buyer-group mb-3';
-        newBuyer.innerHTML = `
-            <h5>Buyer ${buyerIndex + 1}</h5>
-            <div class="form-group">
-                <label>First Name</label>
-                <input type="text" name="buyers[${buyerIndex}][first_name]" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Last Name</label>
-                <input type="text" name="buyers[${buyerIndex}][last_name]" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Contact</label>
-                <textarea name="buyers[${buyerIndex}][contact_no]" class="form-control" required></textarea>
-            </div>
-            <button type="button" class="btn btn-sm btn-danger remove-buyer-btn mt-2">Remove</button>
-            <hr>
-        `;
-        container.appendChild(newBuyer);
-        buyerIndex++;
-    });
-
-    // Remove Buyer (event delegation)
-    document.getElementById('buyers-container').addEventListener('click', function (e) {
-        if (e.target && e.target.classList.contains('remove-buyer-btn')) {
-            e.target.closest('.buyer-group').remove();
-        }
-    });
 
     // Auto-update Lot and House details
     document.getElementById('lot_id').addEventListener('change', function () {
@@ -454,17 +420,38 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const agentSelect = document.getElementById('agent-select');
+    const manualToggle = document.getElementById('manual-agent-toggle');
+    const manualFields = document.getElementById('manual-agent-fields');
+    const manualName = document.getElementById('manual-agent-name');
+    const manualCode = document.getElementById('manual-agent-code');
     const addAgentBtn = document.getElementById('add-agent-btn');
     const agentTableBody = document.querySelector('#selected-agents-table tbody');
     const maxAgents = 3;
 
+    // Toggle manual input fields
+    manualToggle.addEventListener('change', () => {
+        manualFields.style.display = manualToggle.checked ? 'block' : 'none';
+    });
+
+    // Add agent button click
     addAgentBtn.addEventListener('click', () => {
-        const selectedId = agentSelect.value;
-        const selectedName = agentSelect.selectedOptions[0]?.getAttribute('data-name');
+        let selectedId, selectedName;
 
-        if (!selectedId) return;
+        if (manualToggle.checked) {
+            selectedId = manualCode.value.trim();
+            selectedName = manualName.value.trim();
 
-        // Prevent duplicate agents
+            if (!selectedId || !selectedName) {
+                alert('Please enter both agent name and code.');
+                return;
+            }
+        } else {
+            selectedId = agentSelect.value;
+            selectedName = agentSelect.selectedOptions[0]?.getAttribute('data-name');
+            if (!selectedId) return;
+        }
+
+        // Check for duplicate
         if (document.getElementById(`agent-row-${selectedId}`)) {
             alert('Agent already added.');
             return;
@@ -476,9 +463,11 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Create row
         const row = document.createElement('tr');
         row.id = `agent-row-${selectedId}`;
-        row.innerHTML = `
+
+        const agentRowHTML = `
             <td>
                 <input type="hidden" name="agents[]" value="${selectedId}">
                 ${selectedName}
@@ -487,23 +476,131 @@ document.addEventListener('DOMContentLoaded', function () {
                 <input type="number" name="agent_commission_rate[${selectedId}]" class="form-control" step="0.01" min="0" required>
             </td>
             <td>
-                <input type="number" name="agent_commission_amount[${selectedId}]" class="form-control" step="0.01" min="0"  required>
+                <input type="number" name="agent_commission_amount[${selectedId}]" class="form-control" step="0.01" min="0" required>
             </td>
             <td>
                 <button type="button" class="btn btn-sm btn-danger remove-agent-btn">Remove</button>
             </td>
         `;
+        row.innerHTML = agentRowHTML;
         agentTableBody.appendChild(row);
 
-        // Reset select
+        // Reset inputs
         agentSelect.value = '';
+        manualName.value = '';
+        manualCode.value = '';
     });
 
-    // Delegate remove button
+    // Remove agent handler
     agentTableBody.addEventListener('click', function (e) {
         if (e.target.classList.contains('remove-agent-btn')) {
             e.target.closest('tr').remove();
         }
     });
+
+    // Optional: preload existing agents
+    const existingAgents = [
+        // Example preloaded agent data
+        // { id: 'A001', name: 'Smith, John', rate: 10, amount: 1000 }
+    ];
+
+    existingAgents.forEach(agent => {
+        const row = document.createElement('tr');
+        row.id = `agent-row-${agent.id}`;
+
+        const agentRowHTML = `
+            <td>
+                <input type="hidden" name="agents[]" value="${agent.id}">
+                ${agent.name}
+            </td>
+            <td>
+                <input type="number" name="agent_commission_rate[${agent.id}]" class="form-control" value="${agent.rate}" step="0.01" min="0" required>
+            </td>
+            <td>
+                <input type="number" name="agent_commission_amount[${agent.id}]" class="form-control" value="${agent.amount}" step="0.01" min="0" required>
+            </td>
+            <td>
+                <button type="button" class="btn btn-sm btn-danger remove-agent-btn">Remove</button>
+            </td>
+        `;
+        row.innerHTML = agentRowHTML;
+        agentTableBody.appendChild(row);
+    });
 });
+</script>
+
+
+
+<script>
+    let buyerIndex = 1;  // Start with the second buyer
+
+    document.getElementById('add-buyer-btn').addEventListener('click', function() {
+        // Create new buyer group
+        const newBuyerGroup = document.createElement('div');
+        newBuyerGroup.classList.add('buyer-group', 'mb-3');
+        newBuyerGroup.setAttribute('data-buyer-index', buyerIndex);
+
+        newBuyerGroup.innerHTML = `
+            <h5>Buyer ${buyerIndex + 1}</h5>
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" name="buyers[${buyerIndex}][first_name]" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" name="buyers[${buyerIndex}][last_name]" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Contact</label>
+                <textarea name="buyers[${buyerIndex}][contact_no]" class="form-control" required></textarea>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger remove-buyer-btn mt-2">Remove</button>
+            <hr>
+        `;
+
+        // Append the new buyer group to the container
+        document.getElementById('buyers-container').appendChild(newBuyerGroup);
+
+        // Show the "remove" button for all buyers after the first
+        const removeButtons = document.querySelectorAll('.remove-buyer-btn');
+        removeButtons.forEach((btn, index) => {
+            btn.classList.remove('d-none');
+            // Disable remove button for the first buyer to prevent deleting all
+            if (index === 0) {
+                btn.classList.add('d-none');
+            }
+        });
+
+        buyerIndex++; // Increment buyer index for the next buyer
+    });
+
+    // Remove buyer event handler
+    document.getElementById('buyers-container').addEventListener('click', function(event) {
+        if (event.target && event.target.classList.contains('remove-buyer-btn')) {
+            const buyerGroup = event.target.closest('.buyer-group');
+            if (buyerGroup) {
+                buyerGroup.remove();
+                // Reorder the buyer indices
+                const buyerGroups = document.querySelectorAll('.buyer-group');
+                buyerGroups.forEach((group, index) => {
+                    const newIndex = index;
+                    group.setAttribute('data-buyer-index', newIndex);
+                    const inputFields = group.querySelectorAll('input, textarea');
+                    inputFields.forEach(field => {
+                        field.name = field.name.replace(/\[\d+\]/, `[${newIndex}]`);
+                    });
+                });
+
+                // Update the remove buttons (hide/remove the button for the first buyer)
+                const removeButtons = document.querySelectorAll('.remove-buyer-btn');
+                removeButtons.forEach((btn, index) => {
+                    if (index === 0) {
+                        btn.classList.add('d-none');
+                    } else {
+                        btn.classList.remove('d-none');
+                    }
+                });
+            }
+        }
+    });
 </script>
