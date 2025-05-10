@@ -16,9 +16,15 @@ class Reservation extends Controller
 
     public function index()
     {
-        $reservations = Reservations::all();
+        
+       
+        if (current_user_role() === 'agent' || current_user_role() === 10) {
+            $reservations = Reservations::by_agent(current_user_id()) ?? [];
+            #$reservations = Reservations::where('created_by',current_user_id());
+        }else{
+            $reservations = Reservations::all();
+        }
         $approval_logs = Reservations::app_log();
-
         // Group logs by reservation ID
         $logs_by_reservation = [];
         foreach ($approval_logs as $log) {
@@ -106,6 +112,8 @@ class Reservation extends Controller
             'is_voided' => 0,
             'voided_by' => null,
             'void_reason' => null,
+            'created_by' => current_user_id(),
+            'updated_by' => current_user_id() 
         ];
         $reservation = Reservations::create($accountData);
 
@@ -246,6 +254,7 @@ class Reservation extends Controller
             'is_voided' => 0,
             'voided_by' => null,
             'void_reason' => null,
+            'updated_by' => current_user_id() 
         ];
 
         // 2. Update reservation record

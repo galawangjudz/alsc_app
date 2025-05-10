@@ -33,14 +33,50 @@ class Reservations extends Model
             p.c_acronym AS project_acronym,
             l.site_id, 
             l.block, 
-            l.lot
+            l.lot,
+            e.name AS created_by_full_name
         FROM 
             reservations_form ba
         LEFT JOIN reservations_buyer b ON ba.id = b.reservations_form_id AND b.is_primary = TRUE
         LEFT JOIN lots l ON ba.lot_id = l.id
-        LEFT JOIN t_projects p ON l.site_id = p.c_code");
+        LEFT JOIN t_projects p ON l.site_id = p.c_code 
+        LEFT JOIN users e ON ba.created_by = e.employee_id 
+        ORDER by created_at DESC");
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
+
+    public static function by_agent($user_id)
+    {
+        $instance = new static();
+       
+        $stmt = $instance->db->prepare("
+            SELECT 
+                ba.*, 
+                b.*,
+                p.c_acronym AS project_acronym,
+                l.site_id, 
+                l.block, 
+                l.lot
+            FROM 
+                reservations_form ba
+            LEFT JOIN reservations_buyer b ON ba.id = b.reservations_form_id AND b.is_primary = TRUE
+            LEFT JOIN lots l ON ba.lot_id = l.id
+            LEFT JOIN t_projects p ON l.site_id = p.c_code
+            WHERE ba.created_by = :user_id
+        ");
+
+        // Bind the user_id to the statement securely
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+
+        // Execute the query
+        $stmt->execute();
+
+            // Return the fetched results as an array of objects
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+
+    }
+
+
 
     public static function app_log()
     {
@@ -179,7 +215,7 @@ class Reservations extends Model
             'first_down_payment_date', 'full_down_payment_due_date', 'amount_financed',
             'financing_terms_months', 'interest_rate', 'fixed_factor', 'monthly_amortization',
             'amortization_start_date', 'fence_cost', 'add_cost', // <-- added
-            'is_voided', 'voided_by', 'void_reason'
+            'is_voided', 'voided_by', 'void_reason', 'created_by'
         ];
 
 
