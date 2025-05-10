@@ -8,7 +8,7 @@
       <th>Reservation No.</th>
       <th>Buyer(s)</th>
       <th>Lot</th>
-      <th>Current Status</th>
+      <th>Processing Dept.</th>
       <th>Agent</th>
       <th>Sales</th>
       <th>COO</th>
@@ -25,12 +25,16 @@
         <td><?= $res->reservation_no ?></td>
         <td><?= $res->last_name ?>, <?= $res->first_name  ?></td>
         <td><?= $res->lot_id ?></td>
-        <td><span class="badge bg-info"><?= strtoupper($res->current_step) ?></span></td>
+        <td>
+          <span class="badge <?= $res->current_step ? 'bg-info' : 'bg-secondary' ?>">
+            <?= $res->current_step ? strtoupper($res->current_step) : 'Invalid' ?>
+          </span>
+        </td>
         <td><?= renderStep($res->approval_logs, 'agent') ?></td>
         <td><?= renderStep($res->approval_logs, 'sales') ?></td>
         <td><?= renderStep($res->approval_logs, 'coo') ?></td>
         <td><?= renderStep($res->approval_logs, 'cashier') ?></td>
-        <td><?= renderStep($res->approval_logs, 'credit_assessment') ?></td>
+        <td><?= renderStep($res->approval_logs, 'ca') ?></td>
         <td><?= renderStep($res->approval_logs, 'cfo') ?></td>
 
         <td>

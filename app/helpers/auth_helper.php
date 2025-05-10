@@ -42,7 +42,7 @@ function can_user_act_on_step($current_step) {
         'sales' => ['sales', 'admin'],
         'coo' => ['coo', 'admin'],
         'cashier' => ['cashier', 'admin'],
-        'credit_assessment' => ['ca', 'admin'],
+        'ca' => ['ca', 'admin'],
         'cfo' => ['cfo', 'admin'],
     ];
 
@@ -66,7 +66,7 @@ function get_action_button($reservation) {
             break;
 
         case 'sales':
-            if ($role === 'sales') {
+            if ($role === 'sales' && $status === 'submitted') {
                 return '
                     <a href="' . url("reservation/validate/{$id}") . '" class="btn btn-sm btn-success">Validate</a>
                     <a href="' . url("reservation/void/{$id}") . '" class="btn btn-sm btn-danger">Void</a>';
@@ -74,7 +74,7 @@ function get_action_button($reservation) {
             break;
 
         case 'coo':
-            if ($role === 'coo') {
+            if ($role === 'coo'&& $status === 'validated') {
                 return '
                     <a href="' . url("reservation/approve/{$id}") . '" class="btn btn-sm btn-success">Approve</a>
                     <a href="' . url("reservation/disapprove/{$id}") . '" class="btn btn-sm btn-danger">Disapprove</a>';
@@ -83,11 +83,11 @@ function get_action_button($reservation) {
 
         case 'cashier':
             if ($role === 'cashier') {
-                return '<a href="' . url("reservation/payment/{$id}") . '" class="btn btn-sm btn-info">Record Payment</a>';
+                return '<a href="' . url("reservation/approve/{$id}") . '" class="btn btn-sm btn-info">Record Payment</a>';
             }
             break;
 
-        case 'credit_assessment':
+        case 'ca':
             if ($role === 'ca') {
                 return '
                     <a href="' . url("reservation/approve/{$id}") . '" class="btn btn-sm btn-success">Approve</a>

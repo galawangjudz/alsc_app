@@ -6,7 +6,7 @@ require_once __DIR__ . '/../models/House.php';
 require_once __DIR__ . '/../models/HouseModel.php';
 require_once __DIR__ . '/../models/Agent.php';
 require_once __DIR__ . '/../models/ApprovalLog.php';
-
+require_once __DIR__ . '/../models/ReservationPayment.php';
 class Reservation extends Controller
 {
     public function __construct()
@@ -113,7 +113,7 @@ class Reservation extends Controller
             foreach ($_POST['buyers'] as $index => $buyer) {
                 if (!empty($buyer['first_name']) && !empty($buyer['last_name'])) {
                     Reservations::create_buyer([
-                        'buyers_account_draft_id' => $reservation,
+                        'reservations_form_id' => $reservation,
                         'last_name'         => $buyer['last_name'] ?? '',
                         'first_name'        => $buyer['first_name'] ?? '',
                         'contact_no'        => $buyer['contact_no'] ?? '',
@@ -128,7 +128,7 @@ class Reservation extends Controller
         if (isset($_POST['agents']) && is_array($_POST['agents'])) {
             foreach ($_POST['agents'] as $agentId) {
                 Reservations::create_rsv_commission([
-                    'buyers_account_draft_id' => $reservation,
+                    'reservations_form_id' => $reservation,
                     'agent_id' => $agentId,
                     'commission_amount' => $_POST['agent_commission_amount'][$agentId] ?? 0,
                     'rate' => $_POST['agent_commission_rate'][$agentId] ?? 0,
@@ -149,9 +149,11 @@ class Reservation extends Controller
     public function delete($id)
     {
         $reservation = Reservations::index($id);
-       /*  if ($reservation->status !== 'draft') {
-            return $this->view('error', ['message' => 'Deleting is allowed only in draft.']);
-        } */
+        if ($reservation->status !== 'draft') {
+            set_flash('Deleting is allowed only in draft status.','danger');
+            header('Location: ' . url('reservation/show/' . $id));
+            exit;
+        }
         Reservations::delete_buyers($id);
         Reservations::delete_commissions($id);
         Reservations::delete_approval_logs($id);
@@ -255,7 +257,7 @@ class Reservation extends Controller
             foreach ($_POST['buyers'] as $index => $buyer) {
                 if (!empty($buyer['first_name']) && !empty($buyer['last_name'])) {
                     Reservations::create_buyer([
-                        'buyers_account_draft_id' => $id,
+                        'reservations_form_id' => $id,
                         'last_name'         => $buyer['last_name'] ?? '',
                         'first_name'        => $buyer['first_name'] ?? '',
                         'contact_no'        => $buyer['contact_no'] ?? '',
@@ -270,7 +272,7 @@ class Reservation extends Controller
         if (isset($_POST['agents']) && is_array($_POST['agents'])) {
             foreach ($_POST['agents'] as $agentId) {
                 Reservations::create_rsv_commission([
-                    'buyers_account_draft_id' => $id,
+                    'reservations_form_id' => $id,
                     'agent_id' => $agentId,
                     'commission_amount' => $_POST['agent_commission_amount'][$agentId] ?? 0,
                     'rate' => $_POST['agent_commission_rate'][$agentId] ?? 0,
@@ -294,12 +296,14 @@ class Reservation extends Controller
 
         ApprovalLog::log($id, 'agent', 'submitted', current_user_id(), 'Submitted by agent');
         ActivityLog::log(current_user_id(), 'submitted', 'Reservation', 'Submitted reservation ID ' . $id);
+
+        set_flash('Reservation submitted successfully.', 'success');
+
         header('Location: ' . url('reservation/show/' . $id));
         exit;
     }
 
-
-   public function validate($id)
+    public function validate($id)
     {
         $reservation = Reservations::index($id);
         $reservation->status = 'validated';
@@ -308,11 +312,12 @@ class Reservation extends Controller
 
         ApprovalLog::log($id, 'sales', 'validated', current_user_id(), 'Validated by sales');
         ActivityLog::log(current_user_id(), 'update', 'Reservation', 'Validated reservation ID ' . $id);
-        
+
+        set_flash('Reservation validated successfully.', 'success');
+
         header('Location: ' . url('reservation/show/' . $id));
         exit;
     }
-        
 
     public function void($id)
     {
@@ -322,9 +327,13 @@ class Reservation extends Controller
         $reservation->void_reason = $_POST['reason'] ?? 'No reason';
         $reservation->voided_at = date('Y-m-d H:i:s');
         $reservation->status = 'voided';
+        $reservation->current_step = 'agent';
         $reservation->save();
 
         ApprovalLog::log($id, $reservation->current_step, 'voided', current_user_id(), $reservation->void_reason);
+
+        set_flash('Reservation has been voided.', 'warning');
+
         header('Location: ' . url('reservation/show/' . $id));
         exit;
     }
@@ -350,24 +359,38 @@ class Reservation extends Controller
                     $lot->status = 'Pre-Reserved';
                     $lot->save();
                 }
+
+                set_flash('Reservation approved at COO stage.', 'success');
                 break;
 
             case 'cashier':
-                // Cashier doesn't approve; handled by payment logic, skip here
+                // Ensure reservation_fee is fully paid before moving forward
+                $paid = ReservationPayment::getTotalPaid($id);
+                if ($paid < $reservation->reservation_fee) {
+                    $balance = $reservation->reservation_fee - $paid;
+                    return $this->view('reservation/payment_form', [
+                        'reservation' => $reservation,
+                        'paid' => $paid,
+                        'balance' => $balance
+                    ]);
+                }
+
+                $reservation->status = 'paid';
+                $reservation->current_step = 'ca';
+
+                set_flash('Payment received. Proceeding to CA stage.', 'success');
                 break;
 
-            case 'credit_assessment':
+            case 'ca':
                 $reservation->status = 'approved_ca';
                 $reservation->current_step = 'cfo';
-                break;
+                $reservation->save();
 
-            case 'cfo':
-                $reservation->status = 'approved_cfo';
-                $reservation->current_step = 'final';
-                // Optional: trigger book() here if booking is automatic
+                set_flash('Reservation approved at CA stage.', 'success');
                 break;
 
             default:
+                set_flash('Unable to process reservation approval.', 'danger');
                 header('Location: ' . url('reservation/show/' . $id));
                 exit;
         }
@@ -376,6 +399,22 @@ class Reservation extends Controller
         ApprovalLog::log($id, $prevStep, 'approved', current_user_id(), 'Approved at step ' . $prevStep);
 
         header('Location: ' . url('reservation/show/' . $id));
+        exit;
+    }
+
+     public function payment_save()
+    {
+        $data = $_POST;
+        $data['record_by'] = current_user_id();  // Logged-in user
+
+        $success = ReservationPayment::addPayment($data);
+        if ($success) {
+            set_flash('Payment recorded successfully.', 'success');
+        } else {
+            set_flash('Failed to record payment.', 'danger');
+        }
+
+        header('Location: ' . url('reservation/show/' . $data['reservation_id']));
         exit;
     }
 
@@ -388,11 +427,13 @@ class Reservation extends Controller
             case 'coo':
                 $reservation->status = 'disapproved_coo';
                 $reservation->current_step = null; // End
+                set_flash('Reservation disapproved at COO stage.', 'danger');
                 break;
 
-            case 'credit_assessment':
+            case 'ca':
                 $reservation->status = 'disapproved_ca';
                 $reservation->current_step = null; // End
+                set_flash('Reservation disapproved at CA stage.', 'danger');
                 break;
 
             default:
@@ -421,25 +462,34 @@ class Reservation extends Controller
         $reservation->approval_cycle += 1;
         $reservation->save();
 
-        ApprovalLog::log($id, 'credit_assessment', 'revision', current_user_id(), 'Revision sent back to Agent');
+        ApprovalLog::log($id, 'ca', 'revision', current_user_id(), 'Revision sent back to Agent');
+        set_flash('Revision requested and sent back to Agent.', 'info');
+
         header('Location: ' . url('reservation/show/' . $id));
         exit;
     }
 
-
     public function book($id)
     {
-        $reservation = Reservations::find($id);
+        $reservation = Reservations::index($id);
         $reservation->status = 'booked';
         $reservation->current_step = 'final';
         $reservation->save();
 
-        $reservation->lot->update(['available' => false]);
+        $lot = Lot::find_new($reservation->lot_id);
+        if ($lot) {
+            $lot->status = 'Sold';
+            $lot->save();
+        }
 
         ApprovalLog::log($reservation->id, 'cfo', 'booked', current_user_id(), 'Booking triggered by CFO');
 
         ActivityLog::log(current_user_id(), 'update', 'Reservation', 'Booked reservation ID ' . $id);
-        return $this->redirect('reservation/view/' . $id);
+
+        set_flash('Reservation successfully booked.', 'success');
+
+        header('Location: ' . url('reservation/show/' . $id));
+        exit;
     }
 
 
@@ -453,7 +503,7 @@ class Reservation extends Controller
 
         for ($i = 0; $i < 5; $i++) {
             // Get highest existing number for current year
-            $stmt = $pdo->prepare("SELECT reservation_no FROM buyers_account_draft WHERE reservation_no LIKE ? ORDER BY reservation_no DESC LIMIT 1");
+            $stmt = $pdo->prepare("SELECT reservation_no FROM reservations_form WHERE reservation_no LIKE ? ORDER BY reservation_no DESC LIMIT 1");
             $stmt->execute(["{$prefix}%"]);
             $latest = $stmt->fetchColumn();
 
@@ -469,7 +519,7 @@ class Reservation extends Controller
             $newReservationNo = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
             // Double-check uniqueness just in case
-            $check = $pdo->prepare("SELECT COUNT(*) FROM buyers_account_draft WHERE reservation_no = ?");
+            $check = $pdo->prepare("SELECT COUNT(*) FROM reservations_form WHERE reservation_no = ?");
             $check->execute([$newReservationNo]);
             if (!$check->fetchColumn()) {
                 return $newReservationNo;
@@ -487,7 +537,7 @@ class Reservation extends Controller
         $prefix = "DIS-{$year}-";
 
         for ($i = 0; $i < 5; $i++) {
-            $stmt = $pdo->prepare("SELECT reservation_no FROM buyers_account_draft WHERE reservation_no LIKE ? ORDER BY reservation_no DESC LIMIT 1");
+            $stmt = $pdo->prepare("SELECT reservation_no FROM reservations_form WHERE reservation_no LIKE ? ORDER BY reservation_no DESC LIMIT 1");
             $stmt->execute(["{$prefix}%"]);
             $latest = $stmt->fetchColumn();
 
@@ -501,7 +551,7 @@ class Reservation extends Controller
             $disNo = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
             // Just in case — check uniqueness
-            $check = $pdo->prepare("SELECT COUNT(*) FROM buyers_account_draft WHERE reservation_no = ?");
+            $check = $pdo->prepare("SELECT COUNT(*) FROM reservations_form WHERE reservation_no = ?");
             $check->execute([$disNo]);
             if (!$check->fetchColumn()) {
                 return $disNo;

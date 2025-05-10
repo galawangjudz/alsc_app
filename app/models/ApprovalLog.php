@@ -21,24 +21,24 @@ class ApprovalLog extends Model
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public static function forReservation($buyers_account_draft_id)
+    public static function forReservation($reservations_form_id)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("SELECT * FROM {$instance->table} WHERE buyers_account_draft_id = ? ORDER BY action_date ASC");
-        $stmt->execute([$buyers_account_draft_id]);
+        $stmt = $instance->db->prepare("SELECT * FROM {$instance->table} WHERE reservations_form_id = ? ORDER BY action_date ASC");
+        $stmt->execute([$reservations_form_id]);
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
-    public static function log($buyers_account_draft_id, $step, $action, $user_id, $user_role, $remarks = null)
+    public static function log($reservations_form_id, $step, $action, $user_id, $user_role, $remarks = null)
     {
         $instance = new static();
         $sql = "
             INSERT INTO {$instance->table} 
-            (buyers_account_draft_id, step, action, performed_by_user_id, performed_by_role, comments,created_at)
+            (reservations_form_id, step, action, performed_by_user_id, performed_by_role, comments,created_at)
             VALUES (?, ?, ?, ?, ?, ?,NOW())
         ";
         $stmt = $instance->db->prepare($sql);
-        return $stmt->execute([$buyers_account_draft_id, $step, $action, $user_id, $user_role, $remarks]);
+        return $stmt->execute([$reservations_form_id, $step, $action, $user_id, $user_role, $remarks]);
     }
 
     public static function update($id, $data)

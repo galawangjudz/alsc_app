@@ -3,7 +3,7 @@ require_once __DIR__ . '/../core/Model.php';
 
 class Reservations extends Model
 {
-    protected $table = 'buyers_account_draft';
+    protected $table = 'reservations_form';
 
 
     public static function index($id)
@@ -13,7 +13,7 @@ class Reservations extends Model
         // Prepare the statement with placeholders
         $stmt = $instance->db->prepare(" 
             SELECT * 
-            FROM buyers_account_draft 
+            FROM reservations_form 
             WHERE id = ?");
         
         // Execute the statement with the bound parameter
@@ -35,8 +35,8 @@ class Reservations extends Model
             l.block, 
             l.lot
         FROM 
-            buyers_account_draft ba
-        LEFT JOIN reservations_buyer b ON ba.id = b.buyers_account_draft_id AND b.is_primary = TRUE
+            reservations_form ba
+        LEFT JOIN reservations_buyer b ON ba.id = b.reservations_form_id AND b.is_primary = TRUE
         LEFT JOIN lots l ON ba.lot_id = l.id
         LEFT JOIN t_projects p ON l.site_id = p.c_code");
         return $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -47,7 +47,7 @@ class Reservations extends Model
         $instance = new static();
         $stmt = $instance->db->query("
         SELECT 
-            al.buyers_account_draft_id AS id,
+            al.reservations_form_id AS id,
             al.step,
             al.action AS status,
             al.performed_by_user_id,
@@ -55,14 +55,14 @@ class Reservations extends Model
             al.comments,
             al.created_at
         FROM approval_logs al
-        WHERE al.buyers_account_draft_id IN (SELECT id FROM buyers_account_draft)");
+        WHERE al.reservations_form_id IN (SELECT id FROM reservations_form)");
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
     public static function find_co_buyers($id)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("SELECT * FROM reservations_buyer  WHERE buyers_account_draft_id = ? and is_primary != 1");
+        $stmt = $instance->db->prepare("SELECT * FROM reservations_buyer  WHERE reservations_form_id = ? and is_primary != 1");
         $stmt->execute([$id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -70,7 +70,7 @@ class Reservations extends Model
     public static function find_buyers($id)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("SELECT * FROM reservations_buyer  WHERE buyers_account_draft_id = ? order by buyer_id ASC");
+        $stmt = $instance->db->prepare("SELECT * FROM reservations_buyer  WHERE reservations_form_id = ? order by buyer_id ASC");
         $stmt->execute([$id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -88,11 +88,11 @@ class Reservations extends Model
             ba.*, 
             b.*
         FROM 
-            buyers_account_draft ba
-        LEFT JOIN reservations_buyer b ON ba.id = b.buyers_account_draft_id AND b.is_primary = TRUE
+            reservations_form ba
+        LEFT JOIN reservations_buyer b ON ba.id = b.reservations_form_id AND b.is_primary = TRUE
         LEFT JOIN lots l ON ba.lot_id = l.id
         LEFT JOIN t_projects p ON l.site_id = p.c_code
-        WHERE buyers_account_draft_id = ?");
+        WHERE reservations_form_id = ?");
          $stmt->execute([$id]);
 
          return $stmt->fetch(PDO::FETCH_OBJ);
@@ -113,7 +113,7 @@ class Reservations extends Model
             FROM 
                 reservations_commission ac
             LEFT JOIN t_agents ag ON ac.agent_id = ag.c_code
-            WHERE buyers_account_draft_id = ?");
+            WHERE reservations_form_id = ?");
         $stmt->execute([$id]);
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
@@ -126,7 +126,7 @@ class Reservations extends Model
 
         $stmt = $instance->db->prepare("
             INSERT INTO reservations_buyer (
-                buyers_account_draft_id,
+                reservations_form_id,
                 first_name,
                 last_name,
                 contact_no,
@@ -135,7 +135,7 @@ class Reservations extends Model
         ");
 
         return $stmt->execute([
-            $data['buyers_account_draft_id'],
+            $data['reservations_form_id'],
             $data['first_name'],
             $data['last_name'],
             $data['contact_no'],
@@ -149,7 +149,7 @@ class Reservations extends Model
     
         $stmt = $instance->db->prepare("
             INSERT INTO reservations_commission (
-                buyers_account_draft_id,
+                reservations_form_id,
                 agent_id,
                 commission_amount,
                 rate
@@ -157,7 +157,7 @@ class Reservations extends Model
         ");
     
         return $stmt->execute([
-            $data['buyers_account_draft_id'],
+            $data['reservations_form_id'],
             $data['agent_id'],
             $data['commission_amount'],
             $data['rate']
@@ -237,21 +237,21 @@ class Reservations extends Model
     public static function delete_buyers($id)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("DELETE FROM reservations_buyer WHERE buyers_account_draft_id = ?");
+        $stmt = $instance->db->prepare("DELETE FROM reservations_buyer WHERE reservations_form_id = ?");
         return $stmt->execute([$id]);
     }
 
     public static function delete_commissions($id)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("DELETE FROM reservations_commission WHERE buyers_account_draft_id = ?");
+        $stmt = $instance->db->prepare("DELETE FROM reservations_commission WHERE reservations_form_id = ?");
         return $stmt->execute([$id]);
     }
 
     public static function delete_approval_logs($id)
     {
         $instance = new static();
-        $stmt = $instance->db->prepare("DELETE FROM approval_logs WHERE buyers_account_draft_id = ?");
+        $stmt = $instance->db->prepare("DELETE FROM approval_logs WHERE reservations_form_id = ?");
         return $stmt->execute([$id]);
     }
     public function attachAgent($agent_id)

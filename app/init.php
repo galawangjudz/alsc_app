@@ -12,6 +12,7 @@ require_once 'helpers/activity_helper.php';
 require_once 'helpers/notif_helper.php';
 require_once 'helpers/auth_helper.php';
 require_once 'helpers/csrf.php';
+require_once 'helpers/flash.php';
 
 function url($path = '')
 {

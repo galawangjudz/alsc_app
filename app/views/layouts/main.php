@@ -139,6 +139,15 @@
 
         <!-- Main Content -->
         <div class="content w-100">
+           <?php if ($flash = get_flash()): ?>
+                <div style="position: fixed; top: 80px; right: 20px; z-index: 1055; min-width: 300px;">
+                    <div class="alert alert-<?= $flash['type'] ?> alert-dismissible fade show shadow" role="alert">
+                        <?= htmlspecialchars($flash['message']) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <!-- Page Content -->
             <?php echo $content; ?>
         </div>
