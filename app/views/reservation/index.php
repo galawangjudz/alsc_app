@@ -45,14 +45,14 @@
         <td><?= $res->reservation_no ? htmlspecialchars($res->reservation_no) : '<em>---</em>' ?></td>
         <td><?= htmlspecialchars($res->last_name) ?>, <?= htmlspecialchars($res->first_name) ?></td>
         <td><?= htmlspecialchars($res->project_acronym) ?> Block-<?= htmlspecialchars($res->block) ?> Lot-<?= htmlspecialchars($res->lot) ?></td>
-        <td><?= $res->created_by_full_name ? htmlspecialchars($res->created_by_full_name) : 'Unknown' ?></td>
+        <td><?= !empty($res->created_by_full_name) ? htmlspecialchars($res->created_by_full_name) : 'Unknown' ?></td>
         <td>
           <span class="badge <?= $res->current_step ? 'bg-info' : 'bg-secondary' ?>">
             <?= $res->current_step ? strtoupper($res->current_step) : 'Invalid' ?>
           </span>
         </td>
 
-        <td colspan="6">
+        <td>
           <div class="d-flex justify-content-between text-center">
             <?php 
               $steps = ['agent', 'sales', 'coo', 'cashier', 'ca', 'cfo'];
@@ -77,8 +77,7 @@
               <div style="width: 40px;">
                 <div 
                   style="width: 20px; height: 20px; border-radius: 50%; margin: 0 auto; background-color: <?= $color ?>;"
-                  data-bs-toggle="tooltip" data-bs-placement="top" title="<?= htmlspecialchars($tooltip) ?>"
->
+                  data-bs-toggle="tooltip" data-bs-placement="top" title="<?= htmlspecialchars($tooltip) ?>">
                 </div>
                 <small><?= strtoupper($step) ?></small>
               </div>
