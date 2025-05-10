@@ -20,9 +20,8 @@ function can($permission)
     return in_array($permission, $_SESSION['user']['permissions']);
 }
 
-// Assuming you have a function to get the current user's role
-function current_user_role_can_act_on($current_step) {
-    // Map numeric role IDs to their role names
+
+function get_current_user_role() {
     $role_map = [
         10 => 'agent',
         1 => 'admin',
@@ -33,11 +32,11 @@ function current_user_role_can_act_on($current_step) {
         6 => 'cfo',
     ];
 
-    // Get the user's role name
     $role_id = $_SESSION['user']['role_id'] ?? null;
-    $user_role = $role_map[$role_id] ?? null;
+    return $role_map[$role_id] ?? null;
+}
 
-    // Define which roles can act on each step
+function can_user_act_on_step($current_step) {
     $permissions = [
         'agent' => ['agent', 'admin'],
         'sales' => ['sales', 'admin'],
@@ -47,8 +46,67 @@ function current_user_role_can_act_on($current_step) {
         'cfo' => ['cfo', 'admin'],
     ];
 
+    $user_role = get_current_user_role();
     return in_array($user_role, $permissions[$current_step] ?? []);
 }
+
+
+function get_action_button($reservation) {
+    $role = get_current_user_role();
+    $step = $reservation->current_step;
+    $status = $reservation->status;
+    $id = $reservation->id;
+
+    // Match role and step to define what action is valid
+    switch ($step) {
+        case 'agent':
+            if ($role === 'agent' && $status === 'draft') {
+                return '<a href="' . url("reservation/SubmitToSale/{$id}") . '" class="btn btn-sm btn-warning">Submit to Sales</a>';
+            }
+            break;
+
+        case 'sales':
+            if ($role === 'sales') {
+                return '
+                    <a href="' . url("reservation/validate/{$id}") . '" class="btn btn-sm btn-success">Validate</a>
+                    <a href="' . url("reservation/void/{$id}") . '" class="btn btn-sm btn-danger">Void</a>';
+            }
+            break;
+
+        case 'coo':
+            if ($role === 'coo') {
+                return '
+                    <a href="' . url("reservation/approve/{$id}") . '" class="btn btn-sm btn-success">Approve</a>
+                    <a href="' . url("reservation/disapprove/{$id}") . '" class="btn btn-sm btn-danger">Disapprove</a>';
+            }
+            break;
+
+        case 'cashier':
+            if ($role === 'cashier') {
+                return '<a href="' . url("reservation/payment/{$id}") . '" class="btn btn-sm btn-info">Record Payment</a>';
+            }
+            break;
+
+        case 'credit_assessment':
+            if ($role === 'ca') {
+                return '
+                    <a href="' . url("reservation/approve/{$id}") . '" class="btn btn-sm btn-success">Approve</a>
+                    <a href="' . url("reservation/disapprove/{$id}") . '" class="btn btn-sm btn-danger">Disapprove</a>
+                    <a href="' . url("reservation/revision/{$id}") . '" class="btn btn-sm btn-warning">Request Revision</a>';
+            }
+            break;
+
+        case 'cfo':
+            if ($role === 'cfo') {
+                return '<a href="' . url("reservation/book/{$id}") . '" class="btn btn-sm btn-primary">Trigger Booking</a>';
+            }
+            break;
+    }
+
+    return ''; // No action available
+}
+
+
 
 function renderStep_old($logs, $step) {
     $log = array_filter($logs, fn($l) => $l->step === $step);

@@ -148,16 +148,17 @@ class Reservation extends Controller
 
     public function delete($id)
     {
-        if ($reservation->status !== 'draft') {
+        $reservation = Reservations::index($id);
+       /*  if ($reservation->status !== 'draft') {
             return $this->view('error', ['message' => 'Deleting is allowed only in draft.']);
-        }
+        } */
         Reservations::delete_buyers($id);
         Reservations::delete_commissions($id);
         Reservations::delete_approval_logs($id);
         Reservations::delete($id);
 
         ActivityLog::log(current_user_id(), 'delete', 'Reservation', "Draft deleted for {$id}");
-        return $this->view('reservation/index');
+        return $this->redirect("reservation/index");
     }
 
 
@@ -298,21 +299,24 @@ class Reservation extends Controller
     }
 
 
-    public function validateReservation($id)
+   public function validate($id)
     {
-        $reservation = Reservations::find($id);
+        $reservation = Reservations::index($id);
         $reservation->status = 'validated';
-        $reservation->current_step = 'sales';
+        $reservation->current_step = 'coo'; // Corrected this!
         $reservation->save();
 
         ApprovalLog::log($id, 'sales', 'validated', current_user_id(), 'Validated by sales');
         ActivityLog::log(current_user_id(), 'update', 'Reservation', 'Validated reservation ID ' . $id);
-        return $this->redirect('reservation/show/' . $id);
+        
+        header('Location: ' . url('reservation/show/' . $id));
+        exit;
     }
+        
 
     public function void($id)
     {
-        $reservation = Reservations::find($id);
+        $reservation = Reservations::index($id);
         $reservation->is_voided = true;
         $reservation->voided_by = current_user_id();
         $reservation->void_reason = $_POST['reason'] ?? 'No reason';
@@ -321,54 +325,107 @@ class Reservation extends Controller
         $reservation->save();
 
         ApprovalLog::log($id, $reservation->current_step, 'voided', current_user_id(), $reservation->void_reason);
-        return $this->redirect("reservation/view/{$id}");
+        header('Location: ' . url('reservation/show/' . $id));
+        exit;
     }
 
     public function approve($id)
     {
-        $reservation = Reservations::find($id);
+        $reservation = Reservations::index($id);
+        $prevStep = $reservation->current_step;
 
         switch ($reservation->current_step) {
             case 'coo':
+                // Safely assign reservation_no if not already set
+                if (!$reservation->reservation_no) {
+                    $reservation->reservation_no = $this->generateSafeReservationNumber();
+                }
+
                 $reservation->status = 'approved_coo';
                 $reservation->current_step = 'cashier';
+
+                // Update the lot status to "Pre-Reserved"
+                $lot = Lot::find_new($reservation->lot_id);
+                if ($lot) {
+                    $lot->status = 'Pre-Reserved';
+                    $lot->save();
+                }
                 break;
+
+            case 'cashier':
+                // Cashier doesn't approve; handled by payment logic, skip here
+                break;
+
             case 'credit_assessment':
                 $reservation->status = 'approved_ca';
                 $reservation->current_step = 'cfo';
                 break;
+
             case 'cfo':
                 $reservation->status = 'approved_cfo';
                 $reservation->current_step = 'final';
+                // Optional: trigger book() here if booking is automatic
                 break;
+
+            default:
+                header('Location: ' . url('reservation/show/' . $id));
+                exit;
         }
 
         $reservation->save();
-        ApprovalLog::log($id, $reservation->current_step, 'approved', current_user_id());
-        return $this->redirect('reservation/view/' . $id);
+        ApprovalLog::log($id, $prevStep, 'approved', current_user_id(), 'Approved at step ' . $prevStep);
+
+        header('Location: ' . url('reservation/show/' . $id));
+        exit;
     }
 
     public function disapprove($id)
     {
-        $reservation = Reservations::find($id);
+        $reservation = Reservations::index($id);
+        $prevStep = $reservation->current_step;
 
         switch ($reservation->current_step) {
             case 'coo':
                 $reservation->status = 'disapproved_coo';
-                $reservation->current_step = 'agent';
-                $reservation->approval_cycle += 1;
+                $reservation->current_step = null; // End
                 break;
+
             case 'credit_assessment':
                 $reservation->status = 'disapproved_ca';
-                $reservation->current_step = 'agent';
-                $reservation->approval_cycle += 1;
+                $reservation->current_step = null; // End
                 break;
+
+            default:
+                header('Location: ' . url('reservation/show/' . $id));
+                exit;
         }
 
         $reservation->save();
-        ApprovalLog::log($id, $reservation->current_step, 'disapproved', current_user_id());
-        return $this->redirect("reservation/view/{$id}");
+        ApprovalLog::log($id, $prevStep, 'disapproved', current_user_id(), 'Disapproved at ' . $prevStep);
+
+        header('Location: ' . url('reservation/show/' . $id));
+        exit;
     }
+
+    public function revision($id)
+    {
+        $reservation = Reservations::find($id);
+
+        if ($reservation->current_step !== 'credit_assesstment') {
+            header('Location: ' . url('reservation/show/' . $id));
+            exit;
+        }
+
+        $reservation->status = 'revision_requested';
+        $reservation->current_step = 'agent';
+        $reservation->approval_cycle += 1;
+        $reservation->save();
+
+        ApprovalLog::log($id, 'credit_assessment', 'revision', current_user_id(), 'Revision sent back to Agent');
+        header('Location: ' . url('reservation/show/' . $id));
+        exit;
+    }
+
 
     public function book($id)
     {
@@ -384,6 +441,77 @@ class Reservation extends Controller
         ActivityLog::log(current_user_id(), 'update', 'Reservation', 'Booked reservation ID ' . $id);
         return $this->redirect('reservation/view/' . $id);
     }
+
+
+    private function generateSafeReservationNumber()
+    {
+       // Use the Connection class to get the PDO connection
+        $pdo = Connection::getInstance()->getConnection();
+
+        $year = date('Y');
+        $prefix = "RES-{$year}-";
+
+        for ($i = 0; $i < 5; $i++) {
+            // Get highest existing number for current year
+            $stmt = $pdo->prepare("SELECT reservation_no FROM buyers_account_draft WHERE reservation_no LIKE ? ORDER BY reservation_no DESC LIMIT 1");
+            $stmt->execute(["{$prefix}%"]);
+            $latest = $stmt->fetchColumn();
+
+            $nextNumber = 1;
+            if ($latest) {
+                // Extract the last number
+                $parts = explode('-', $latest);
+                $lastNumber = (int)end($parts);
+                $nextNumber = $lastNumber + 1;
+            }
+
+            // Generate the new reservation number
+            $newReservationNo = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+            // Double-check uniqueness just in case
+            $check = $pdo->prepare("SELECT COUNT(*) FROM buyers_account_draft WHERE reservation_no = ?");
+            $check->execute([$newReservationNo]);
+            if (!$check->fetchColumn()) {
+                return $newReservationNo;
+            }
+        }
+
+        throw new Exception("Failed to generate unique reservation number after multiple attempts.");
+    }
+        
+
+    private function generateDisapprovedReservationNumber()
+    {
+        $pdo = Connection::getInstance()->getConnection();
+        $year = date('Y');
+        $prefix = "DIS-{$year}-";
+
+        for ($i = 0; $i < 5; $i++) {
+            $stmt = $pdo->prepare("SELECT reservation_no FROM buyers_account_draft WHERE reservation_no LIKE ? ORDER BY reservation_no DESC LIMIT 1");
+            $stmt->execute(["{$prefix}%"]);
+            $latest = $stmt->fetchColumn();
+
+            $nextNumber = 1;
+            if ($latest) {
+                $parts = explode('-', $latest);
+                $lastNumber = (int)end($parts);
+                $nextNumber = $lastNumber + 1;
+            }
+
+            $disNo = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+            // Just in case — check uniqueness
+            $check = $pdo->prepare("SELECT COUNT(*) FROM buyers_account_draft WHERE reservation_no = ?");
+            $check->execute([$disNo]);
+            if (!$check->fetchColumn()) {
+                return $disNo;
+            }
+        }
+
+        throw new Exception("Failed to generate unique disapproved reservation number.");
+    }
+
+
 
     public function show($id)
     {

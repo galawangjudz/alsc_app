@@ -23,6 +23,9 @@
     <label>Area (sqm):</label>
     <input type="text" name="lot_area" value="<?= $lot->lot_area ?? '' ?>" required><br>
 
+    <label>Price per sqm:</label>
+    <input type="text" name="price_per_sqm" value="<?= $lot->price_per_sqm ?? '' ?>" required><br>
+
     <label>Status:</label>
     <select name="status" required>
         <?php
@@ -64,7 +67,7 @@
     <label>Floor Area:</label>
     <input type="text" name="floor_area" value="<?= $house->floor_area ?? '' ?>"><br>
 
-    <label>Price per Sqm:</label>
+    <label>House Price per Sqm:</label>
     <input type="text" name="price_per_sqm" value="<?= $house->price_per_sqm ?? '' ?>"><br>
 
     <label>Status:</label>

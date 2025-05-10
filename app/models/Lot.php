@@ -50,6 +50,15 @@ class Lot extends Model
     }
 
 
+     public static function find_new($id)
+    {
+        $instance = new static();
+        $stmt = $instance->db->prepare("SELECT * FROM lots WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetchObject(static::class);
+    }
+
+
 
     public static function insert($data)
     {

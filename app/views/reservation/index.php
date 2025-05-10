@@ -34,10 +34,8 @@
         <td><?= renderStep($res->approval_logs, 'cfo') ?></td>
 
         <td>
-          <a href="<?= url('reservation/show/'. $res->id) ?>" class="btn btn-sm btn-outline-primary">View</a>
-          <?php if (current_user_role_can_act_on($res->current_step)) : ?>
-            <a href="" class="btn btn-sm btn-success">Take Action</a>
-          <?php endif; ?>
+            <a href="<?= url('reservation/show/' . $res->id) ?>" class="btn btn-sm btn-outline-primary">View</a>
+            <?= can_user_act_on_step($res->current_step) ? get_action_button($res) : '' ?>
         </td>
       </tr>
     <?php endforeach; ?>
